@@ -289,7 +289,9 @@ export default class Demo extends Component<any, any> {
         <div className="line-chart-wrapper">
           <ToolBox>
 
-            <ToolBar>
+            <ToolBar 
+              displayMode={'visible' /* hidden, hover */}
+            >
               <Camera/>
               <ZoomSelect />
               <ZoomIn />
@@ -306,14 +308,14 @@ export default class Demo extends Component<any, any> {
                 <CartesianGrid vertical={false} />
                 <XAxis  dataKey="date" label="Date"  height={5}/>
                 <YAxis  dataKey="price" label="Stock Price"/>
-                <Tooltip
+                {/* <Tooltip
                   wrapperStyle={{
                     borderColor: 'white',
                     boxShadow: '2px 2px 3px 0px rgb(204, 204, 204)',
                   }}
                   contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
                   labelStyle={{ fontWeight: 'bold', color: '#666666' }}
-                />
+                /> */}
               
                 <Line dataKey="price" stroke="#ff7300" dot={false} />
               

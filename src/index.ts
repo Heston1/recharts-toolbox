@@ -8,6 +8,7 @@ export type {Props as ToolBoxProps} from './ToolBox';
 export { AutoScale } from './components/AutoScale';
 // export { BoxSelect } from './components/BoxSelect';
 export { Camera } from './components/Camera';
+export type {Props as CameraProps} from './ToolBox';
 // export { CartesianLines } from './components/CartesianLines';
 // export { CartesianTooltipToggle } from './components/CartesianToolTipToggle';
 // export { LasoSelect } from './components/LasoSelect';

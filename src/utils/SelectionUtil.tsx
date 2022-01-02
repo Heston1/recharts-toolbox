@@ -7,12 +7,12 @@ const SelectionUtil = (selectionProps: any)  => {
     return <Customized 
         component={
             (props: any) => {
-                const [start, setStart] = React.useState();
-                const [end, setEnd] = React.useState();
+                const [start, setStart] = React.useState(null);
+                const [end, setEnd] = React.useState(null);
 
                 return (
                     <g>
-                        <mask id="selection_zoom_mask">
+                        <mask id="selection_mask">
                             <rect 
                                 x={props.yAxisMap[0].width + props.yAxisMap[0].x} 
                                 y={props.yAxisMap[0].y} 
@@ -32,26 +32,31 @@ const SelectionUtil = (selectionProps: any)  => {
                             }
                         </mask>
                         <rect 
-                            onMouseDown={e => {
+                            onMouseDown={(e: any) => {
                                 setStart(null); setEnd(null);
                                 const bbox = e.target.getBoundingClientRect();
-                                console.log(bbox, props.yAxisMap[0])
-                                setStart({x: e.clientX - 7.5, y: e.clientY - bbox.top + props.yAxisMap[0].y});   
+                               
+                                setStart({x: e.clientX - selectionProps.offsetLeft, y: e.clientY - bbox.top + props.yAxisMap[0].y}); 
+                                
                                 select_wasMoved = true;
                             }}
-                            onMouseMove={e => {
+                            onMouseMove={(e: any)  => {
                                 if (select_wasMoved) {
-                                    const bbox = e.target.getBoundingClientRect()
-                                    setEnd({x: e.clientX - 7.5, y: e.clientY - bbox.top + props.yAxisMap[0].y})
+                                    const bbox = e.target.getBoundingClientRect();
+
+                                    setEnd({x: e.clientX - selectionProps.offsetLeft, y: e.clientY - bbox.top + props.yAxisMap[0].y});
                                 }
                             }}
-                            onMouseUp={e => {
-                                const bbox = e.target.getBoundingClientRect()
-                                setEnd({x: e.clientX  - 7.5, y: e.clientY - bbox.top + props.yAxisMap[0].y})
+                            onMouseUp={(e: any)  => {
+                                const bbox = e.target.getBoundingClientRect();
+
+                                setEnd({x: e.clientX - selectionProps.offsetLeft, y: e.clientY - bbox.top + props.yAxisMap[0].y});
+
                                 select_wasMoved = false;
 
                                 selectionProps?.setZoomState(false);
                                 
+                                //TODO
                                 const x1 = start.x < end.x ? start.x : end.x;
                                 const y1 = start.y < end.y ? start.y : end.y;
                                 const x2 = start.x > end.x ? start.x : end.x;
@@ -77,8 +82,8 @@ const SelectionUtil = (selectionProps: any)  => {
                             y={props.yAxisMap[0].y} 
                             width={props.xAxisMap[0].width} 
                             height={props.yAxisMap[0].height} 
-                            style={{opacity: 0.3, cursor: 'crosshair'}}
-                            mask="url(#selection_zoom_mask)" 
+                            style={{opacity: select_wasMoved ? 0.3 : 0, cursor: 'crosshair'}}
+                            mask="url(#selection_mask)" 
                         />
                     </g>
                 )
