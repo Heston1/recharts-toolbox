@@ -57,11 +57,11 @@ export const ToolBox = (props: ToolBoxProps) => {
     );
 
     const ToolBar = createProxy((customizedProps: any) => {
-        return React.createElement(//TODO clone instead
-            'div', 
+        return React.cloneElement(
+            toolbarComponents,
             {
-                style: {display: 'flex', flexDirection: 'column', flexWrap: 'wrap', gap: '5px'}
-            }, 
+                customizedProps
+            },
             React.Children.map(toolbarComponents?.props.children, child => {
               
                 return React.cloneElement(
@@ -125,7 +125,13 @@ export const ToolBox = (props: ToolBoxProps) => {
     return (
         <div ref={containerRef} style={{position: 'relative'}}>
             
-            <div ref={toolbarRef} style={{position: 'absolute', top: 0, left: parent && parent.props.width }} />
+            <div
+                ref={toolbarRef} 
+                style={{
+                    position: 'absolute', 
+                    top: 0,  right: 0,left: 0, bottom: 0
+                }} 
+            />
 
             {parent &&
                 React.cloneElement(

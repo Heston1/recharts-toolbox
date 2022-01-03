@@ -1,7 +1,3 @@
-/**
- * 
- */
-
 export { ToolBox } from './ToolBox';
 export type {Props as ToolBoxProps} from './ToolBox';
 
@@ -16,6 +12,7 @@ export { Pan } from './components/Pan';
 export { Reset } from './components/Reset';
 // export { ToggleHover } from './components/ToggleHover';
 export { ToolBar } from './components/ToolBar';
+export type {Props as ToolBarProps} from './ToolBox';
 export { ZoomIn } from './components/ZoomIn';
 export { ZoomOut } from './components/ZoomOut';
 export { ZoomSelect } from './components/ZoomSelect';

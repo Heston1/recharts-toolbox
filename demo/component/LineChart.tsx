@@ -288,7 +288,7 @@ export default class Demo extends Component<any, any> {
           <ToolBox>
 
             <ToolBar 
-              displayMode={'visible' /* hidden, hover */}
+              displayMode={'visible'}
             >
               <Camera/>
               <ZoomSelect />
