@@ -13,7 +13,7 @@ export type {Props as CameraProps} from './ToolBox';
 // export { CartesianTooltipToggle } from './components/CartesianToolTipToggle';
 // export { LasoSelect } from './components/LasoSelect';
 export { Pan } from './components/Pan';
-export { ResetAxis } from './components/ResetAxis';
+export { Reset } from './components/Reset';
 // export { ToggleHover } from './components/ToggleHover';
 export { ToolBar } from './components/ToolBar';
 export { ZoomIn } from './components/ZoomIn';

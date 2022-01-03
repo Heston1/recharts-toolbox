@@ -2,12 +2,13 @@ import React from 'react';
 import usePrevious from '../utils/usePrevious';
 
 export const ZoomSelect  = (props: any) => {
-    const {setZoomState, selectCoords, setYAxisDomain} = props;
+    const {setZoomState, selectCoords, setYAxisDomain,setSelectCoords} = props;
     const prev = usePrevious(selectCoords) //use prev to avoid re-render
     
     React.useEffect(() => {
-        if (selectCoords != prev) {
-            setYAxisDomain(selectCoords.yDomain)
+        if (selectCoords != null && selectCoords != prev) {
+            setYAxisDomain(selectCoords.yDomain);
+            setSelectCoords(null); //reset coords
         }
     }, [selectCoords])
 

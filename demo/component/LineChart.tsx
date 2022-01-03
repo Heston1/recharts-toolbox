@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, ReferenceLine, ReferenceArea,
-  ReferenceDot, Tooltip, CartesianGrid, Legend, Brush, ErrorBar, AreaChart, Area,
-  Label, LabelList, Customized } from 'recharts';
-import {ToolBox, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, ResetAxis, Camera, ToolBar} from 'recharts-toolbox';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
+import {ToolBox, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, ToolBar} from 'recharts-toolbox';
 import { changeNumberOfData } from './utils';
 import * as _ from 'lodash';
 
@@ -298,7 +296,7 @@ export default class Demo extends Component<any, any> {
               <ZoomOut />
               <Pan />
               <AutoScale />
-              <ResetAxis />
+              <Reset />
             </ToolBar>
 
             <LineChart
@@ -317,7 +315,7 @@ export default class Demo extends Component<any, any> {
                   labelStyle={{ fontWeight: 'bold', color: '#666666' }}
                 /> */}
               
-                <Line dataKey="price" stroke="#ff7300" dot={false} />
+                <Line dataKey="price" stroke="#ff7300" dot={false} isAnimationActive={false} animationDuration={0}/>
               
             </LineChart>
           </ToolBox>

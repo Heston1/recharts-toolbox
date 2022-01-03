@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Customized } from 'recharts';
+import AxisDragUtil from './utils/AxisDragUtil';
 import SelectionUtil from './utils/SelectionUtil';
 
 export interface ToolBoxProps {
@@ -9,19 +10,19 @@ export interface ToolBoxProps {
 export type Props = ToolBoxProps;
 
 export const ToolBox = (props: ToolBoxProps) => {
+    const toolbox_graph_ref = React.useRef(
+        `toolbox_ref_${Date.now().toString(36) + Math.random().toString(36).substring(0,2)}`
+    );
     const toolbarRef = React.useRef(null);
     const containerRef = React.useRef(null);
     const [parent, setParent] = React.useState(null);
     const [toolbarComponents, setToolbarComponents] = React.useState(null);
 
-    const [yAxisDomain, setYAxisDomain] = React.useState([0, 'auto']); 
+    const [yAxisDomain, setYAxisDomain] = React.useState([0, 100]); 
     const [xAxisDomain, setXAxisDomain] = React.useState([0, 'auto']);
 
     const [zoomState, setZoomState] = React.useState(null)
     const [selectCoords, setSelectCoords] = React.useState(null);
-    const toolbox_graph_ref = React.useRef(
-        `toolbox_ref_${Date.now().toString(36) + Math.random().toString(36).substring(0,2)}`
-    )
 
     React.useEffect(() => {
         const setComponents = (child: any) => {
@@ -72,13 +73,14 @@ export const ToolBox = (props: ToolBoxProps) => {
                         setYAxisDomain,
                         zoomState,
                         setZoomState,
-                        selectCoords
+                        selectCoords,
+                        setSelectCoords
                     }
                 );
             })
         )
-    });
-
+    })
+    
     const children = parent && React.Children.map(
         parent.props.children.concat(
             [
@@ -88,6 +90,15 @@ export const ToolBox = (props: ToolBoxProps) => {
                     setZoomState, 
                     yAxisDomain,
                     offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0
+                }),
+                AxisDragUtil({
+                    yAxisDomain,
+                    offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0,
+                    onCoordChange: (coords: any) => {
+                        //disable tooltip 
+                        // console.log("here", coords)
+                        setYAxisDomain(coords)
+                    }, 
                 })
             ]
         ), 
@@ -101,7 +112,7 @@ export const ToolBox = (props: ToolBoxProps) => {
                 case "YAxis":
                     return React.cloneElement(child, { 
                         allowDataOverflow: true, 
-                        domain: yAxisDomain
+                        domain: yAxisDomain,
                     })
                 case "XAxis":
                     return React.cloneElement(child, { allowDataOverflow: true, })
@@ -120,8 +131,8 @@ export const ToolBox = (props: ToolBoxProps) => {
                 React.cloneElement(
                     parent, 
                     {
-                        // data: parent.props.data
-                        //     .map((point: any) => ({date: new Date(point.date).getTime()/1000, price: point.price})),
+                        data: parent.props.data
+                            .map((point: any) => ({date: new Date(point.date).getTime()/1000, price: point.price})),
                         id: toolbox_graph_ref.current
                     }, 
                     children

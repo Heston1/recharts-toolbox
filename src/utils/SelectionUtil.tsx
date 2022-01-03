@@ -66,10 +66,9 @@ const SelectionUtil = (selectionProps: any)  => {
                                     const [yA1, yA2] = selectionProps?.yAxisDomain;
 
                                     selectionProps?.onCoordChange({
-                                        // x1, x2, y1, y2,
                                         yDomain: [
-                                            yA2 - (yA1 + ( (yA2 - yA1) * (y2 - props.yAxisMap[0].y)/(props.yAxisMap[0].height) ) ),
-                                            yA2 - (yA1 + ( (yA2 - yA1) * (y1 - props.yAxisMap[0].y)/(props.yAxisMap[0].height) ) ),
+                                            (yA2 - ( (yA2 - yA1) * (y2 - props.yAxisMap[0].y)/(props.yAxisMap[0].height) ) ) ,
+                                            (yA2 - ( (yA2 - yA1) * (y1 - props.yAxisMap[0].y)/(props.yAxisMap[0].height) ) ) ,
                                         ],
                                         xDomain: [
                                             //TODO

@@ -4,10 +4,11 @@ export const ZoomOut = (props: any) => {
     const {yAxisDomain, setYAxisDomain} = props;
 
     const zoomFunction = (e: any) => {
-        const diff = Math.abs(yAxisDomain[1] - yAxisDomain[0]);
-        const scale = diff * 2;
-        const x = parseFloat((yAxisDomain[0] - (scale/4)).toFixed(5));
-        const y = parseFloat((yAxisDomain[1] + (scale/4)).toFixed(5));
+        const diff = Math.abs(yAxisDomain[1]  - yAxisDomain[0]);
+        const scale = Math.pow(Math.sqrt(diff), 2)/2;
+        const x = yAxisDomain[0] - scale;
+        const y = yAxisDomain[1] + scale;
+        
         setYAxisDomain([x, y])
     };
 

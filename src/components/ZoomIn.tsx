@@ -5,9 +5,9 @@ export const ZoomIn = (props: any) => {
     
     const zoomFunction = (e: any) => {
         const diff = Math.abs(yAxisDomain[1] - yAxisDomain[0]);
-        const scale = diff < 1 ? Math.pow(diff, 3): Math.sqrt(diff);
-        const x = parseFloat((yAxisDomain[0] + scale).toFixed(5));
-        const y = parseFloat((yAxisDomain[1] - scale).toFixed(5));
+        const scale = diff*0.25
+        const x = yAxisDomain[0] + scale;
+        const y = yAxisDomain[1] - scale;
         setYAxisDomain([x, y])
     };
 
