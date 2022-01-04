@@ -32,8 +32,8 @@ const AxisDragUtil = (axisDragProps: any)  => {
                                         const [yA1, yA2] = axisDragProps?.yAxisDomain;
                                         
                                         axisDragProps?.onCoordChange([
-                                            yA1 + dist,
-                                            yA2 + dist
+                                            yA1 - (dist * 0.2) , //* by scale
+                                            yA2 - (dist * 0.2)
                                         ])
                                         
                             });

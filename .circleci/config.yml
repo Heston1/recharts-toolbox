@@ -1,13 +1,18 @@
 version: 2.1
-orbs:
-  node: circleci/node@4.7.0
 jobs:
   build:
-    executor:
-      name: node/default
-      tag: '10.4'
+    docker: 
+      - image: circleci/node:14.17.3
+    resource_class: small
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - v1-deps-{{ checksum "yarn.lock" }}
       - run: yarn install
+      - save_cache:
+          key: v1-deps-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules
       - run: yarn build
-      # - run: npm run test 
+      # - run: yarn test 

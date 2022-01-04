@@ -15,14 +15,19 @@ export const ToolBox = (props: ToolBoxProps) => {
     );
     const toolbarRef = React.useRef(null);
     const containerRef = React.useRef(null);
+    const graphStatetRef = React.useRef(null);
+
     const [parent, setParent] = React.useState(null);
+    
     const [toolbarComponents, setToolbarComponents] = React.useState(null);
 
-    const [yAxisDomain, setYAxisDomain] = React.useState([0, 100]); 
+    const [yAxisDomain, setYAxisDomain] = React.useState([20, 110]); 
     const [xAxisDomain, setXAxisDomain] = React.useState([0, 'auto']);
 
     const [zoomState, setZoomState] = React.useState(null)
     const [selectCoords, setSelectCoords] = React.useState(null);
+
+    const [hasSet, setHasSet] = React.useState(false) //circular
 
     React.useEffect(() => {
         const setComponents = (child: any) => {
@@ -49,42 +54,30 @@ export const ToolBox = (props: ToolBoxProps) => {
             setParent(null) //toolbar or chart not a child
         }   
     }, []);
-
-    const createProxy = (component: any) => (
-        <Customized component={(customizedProps: any) => (
-            toolbarRef.current ? ReactDOM.createPortal(component(customizedProps), toolbarRef.current) : null
-        )}/>
-    );
-
-    const ToolBar = createProxy((customizedProps: any) => {
-        return React.cloneElement(
-            toolbarComponents,
-            {
-                customizedProps
-            },
-            React.Children.map(toolbarComponents?.props.children, child => {
-              
-                return React.cloneElement(
-                    child, 
-                    {
-                        ...customizedProps, 
-                        graph_uid: toolbox_graph_ref.current,
-                        yAxisDomain, 
-                        setYAxisDomain,
-                        zoomState,
-                        setZoomState,
-                        selectCoords,
-                        setSelectCoords
-                    }
-                );
-            })
-        )
-    })
     
-    const children = parent && React.Children.map(
+    //huh??
+    const proxy = (sourceRef: any, dest: any) => (
+        <Customized component={(customizedProps: any) => {
+            React.useEffect(() => {
+                graphStatetRef.current = customizedProps
+                if (hasSet == false) {
+                    setHasSet(true)
+                } else {
+                    return;
+                }
+            }, [customizedProps])
+            
+            return sourceRef
+                ? ReactDOM.createPortal(
+                    <></>, dest) 
+                : null
+        }}/>
+    );
+    
+    const children = () => parent && React.Children.map(
         parent.props.children.concat(
             [
-                ToolBar, 
+                proxy(toolbarComponents, toolbarRef.current),
                 zoomState && SelectionUtil({
                     onCoordChange: (coords: any) => setSelectCoords(coords), 
                     setZoomState, 
@@ -95,8 +88,7 @@ export const ToolBox = (props: ToolBoxProps) => {
                     yAxisDomain,
                     offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0,
                     onCoordChange: (coords: any) => {
-                        //disable tooltip 
-                        // console.log("here", coords)
+                        //TODO disable tooltip, hide toolbar
                         setYAxisDomain(coords)
                     }, 
                 })
@@ -121,17 +113,40 @@ export const ToolBox = (props: ToolBoxProps) => {
             };
         }
     );
-    
+   
     return (
         <div ref={containerRef} style={{position: 'relative'}}>
-            
             <div
                 ref={toolbarRef} 
                 style={{
                     position: 'absolute', 
-                    top: 0,  right: 0,left: 0, bottom: 0
+                    top: 0, right: 0,left: 0, bottom: 0
                 }} 
-            />
+            >
+                {(graphStatetRef.current && hasSet) && 
+                    React.cloneElement(
+                        toolbarComponents,
+                        {
+                            customizedProps: graphStatetRef.current,
+                        },
+                        React.Children.map(toolbarComponents.props.children, child => {
+                            return React.cloneElement(
+                                child, 
+                                {
+                                    ...graphStatetRef.current, 
+                                    graph_uid: toolbox_graph_ref.current,
+                                    yAxisDomain, 
+                                    setYAxisDomain,
+                                    zoomState,
+                                    setZoomState,
+                                    selectCoords,
+                                    setSelectCoords
+                                }
+                            );
+                        })
+                    )
+                }   
+            </div>
 
             {parent &&
                 React.cloneElement(
@@ -141,7 +156,7 @@ export const ToolBox = (props: ToolBoxProps) => {
                             .map((point: any) => ({date: new Date(point.date).getTime()/1000, price: point.price})),
                         id: toolbox_graph_ref.current
                     }, 
-                    children
+                    children()
                 )
             }
         </div>

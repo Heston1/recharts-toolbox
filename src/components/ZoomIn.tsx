@@ -5,7 +5,9 @@ export const ZoomIn = (props: any) => {
     
     const zoomFunction = (e: any) => {
         const diff = Math.abs(yAxisDomain[1] - yAxisDomain[0]);
-        const scale = diff*0.25
+
+        //use scaling function passed from props
+        const scale = (((diff)/2)/Math.log(5))  //huh??
         const x = yAxisDomain[0] + scale;
         const y = yAxisDomain[1] - scale;
         setYAxisDomain([x, y])

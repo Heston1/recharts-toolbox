@@ -5,10 +5,10 @@ export const ZoomOut = (props: any) => {
 
     const zoomFunction = (e: any) => {
         const diff = Math.abs(yAxisDomain[1]  - yAxisDomain[0]);
-        const scale = Math.pow(Math.sqrt(diff), 2)/2;
+        
+        const scale = (Math.log(5)*(diff/2)); 
         const x = yAxisDomain[0] - scale;
         const y = yAxisDomain[1] + scale;
-        
         setYAxisDomain([x, y])
     };
 
