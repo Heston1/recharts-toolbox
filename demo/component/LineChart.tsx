@@ -290,13 +290,14 @@ export default class Demo extends Component<any, any> {
             <ToolBar 
               displayMode={'visible'}
             >
-              <Camera/>
               <ZoomSelect />
               <ZoomIn />
               <ZoomOut />
               <Pan />
               <AutoScale />
               <Reset />
+
+              <Camera/>
             </ToolBar>
 
             <LineChart
@@ -304,8 +305,8 @@ export default class Demo extends Component<any, any> {
               margin={{ top: 40, right: 40, bottom: 20, left: 20 }}
             >
                 <CartesianGrid vertical={false} />
-                <XAxis  dataKey="date" label="Date"  height={5}/>
-                <YAxis  dataKey="price" label="Stock Price"/>
+                <XAxis  dataKey="date" label="Date"  height={5} />
+                <YAxis  dataKey="price" label="Stock Price" scale={'linear'}/>
                 {/* <Tooltip
                   wrapperStyle={{
                     borderColor: 'white',
