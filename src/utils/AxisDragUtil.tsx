@@ -1,66 +1,138 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Customized } from 'recharts';
 
-let target: any;
+let targetY: any, targetX: any, moving = false;
 const AxisDragUtil = (axisDragProps: any)  => {
-    //TODO handle padding/margin, other offsets
     return <Customized 
         component={
             (props: any) => {
+                //TODO handle category
+                const dragHandle = (e: any, key: string) => {
+                    e.persist();
+                    const bbox = e.target.getBoundingClientRect();
+
+                    const originY = e.pageY;
+                    const originX = e.pageX;
+                    const relativeOriginY = e.clientY - bbox.top;
+                    const relativeOriginX = e.clientY - bbox.top;
+                    
+                    targetY = axisDragProps?.yAxisDomain;
+                    targetX = axisDragProps?.xAxisDomain;
+                    
+                    let cursor: string;
+                    switch (key) {
+                        case 'y':
+                            cursor = 'n-resize';
+                            break;
+                        case 'x':
+                            cursor = 'e-resize';
+                            break;
+                        case 'xy':
+                            cursor = 'ne-resize';
+                            break;
+                        default:
+                            //invalid key
+                            break;
+                    }
+                    let dragContainer = document.createElement('div');
+                    dragContainer.setAttribute('style', `position:absolute;top:0;bottom:0;left:0;right:0;z-index:10000;cursor:${cursor}`);
+                    dragContainer.setAttribute('id', 'drag-overlay-root');
+                    moving = true;
+
+                    dragContainer.addEventListener('mouseup', (ev: any) => {
+                        dragContainer.remove(); 
+                        moving = false; //TODO: is this needed when its removed?
+                    });
+                    dragContainer.addEventListener('mousemove', (ev: any) => {
+                            if (!moving) 
+                                return;
+
+                            ev.stopPropagation();
+                            ev.preventDefault();
+
+                            const cursorPosY = originY - ev.pageY;
+                            const cursorPosX = originX - ev.pageX;
+
+                            const [yA1, yA2] = targetY; 
+                            const [xA1, xA2] = targetX; 
+
+                            const tickSizeY = (yA2-yA1)/props.yAxisMap[0].height;
+                            const tickSizeX = (yA2-yA1)/props.xAxisMap[0].width;
+                            const distanceY = cursorPosY*tickSizeY;
+                            const distanceX = cursorPosX*tickSizeX;
+                            const log = Math.log(5);
+
+                            if (key == 'xy') {
+                                const domainY = [yA1 - (distanceY * log), yA2];
+                                const domainX = [xA1 - (distanceX * log), xA2];
+
+                                axisDragProps?.onCoordYChange(domainY);
+                                axisDragProps?.onCoordXChange(domainX);
+                                return;
+                            }
+                           
+                            const axisH = key == 'x' 
+                                ? props.xAxisMap[0].width 
+                                : props.yAxisMap[0].height;
+
+                            const
+                                z1 = 0,
+                                z2 = axisH * 1/10,
+                                z3 =  (axisH * 4/5)+z2,
+                                z4 =  (axisH * 1/10)+z3;
+                                
+                            let domain: any = [];
+
+                            const ro = key == 'x' ? relativeOriginX : relativeOriginY;
+                            const dist = key == 'x' ? distanceX : distanceY;
+                            const a1 = key == 'x' ? xA1 : yA1;
+                            const a2 = key == 'x' ? xA2 : yA2;
+                            
+                            if (ro > z1 && ro <= z2) {
+                                domain = [a1, a2 - (dist * log)]
+                            }
+                            else if (ro > z2 && ro <= z3) {
+                                domain = [a1 - dist, a2 - dist]
+                            }
+                            else if (ro > z3 && ro <= z4) {
+                                domain = [a1 - (dist * log), a2]
+                            }
+
+                            if (key == 'x') {
+                                axisDragProps?.onCoordXChange(domain);
+                            } 
+                            else {
+                                axisDragProps?.onCoordYChange(domain);
+                            }
+                          
+                    });
+                    document.body.appendChild(dragContainer);
+                }
+
                 return (
                     <g>
+                        {/* TODO apply to multiple axis, this only applies to the first x and y axis currently */}
+                        {/* x axis */}
                         <rect 
-                            onMouseDown={(e: any) => {
-                                e.persist();
-                                const bbox = e.target.getBoundingClientRect();
-
-                                const origin = e.pageY;
-                                const relativeOrigin = e.clientY - bbox.top 
-                                // const [yA1, yA2] = axisDragProps?.yAxisDomain;
-                                target = axisDragProps?.yAxisDomain;
-                                const cursor = 'n-resize'
-                                let dragContainer = document.createElement('div')
-                                dragContainer.setAttribute('style', `position:absolute;top:0;bottom:0;left:0;right:0;z-index:10000;cursor:${cursor}`);
-                                dragContainer.setAttribute('id', 'drag-overlay-root');
-                                dragContainer.addEventListener('mouseup', (ev: any) => {
-                                    ev.target.remove();
-                                });
-                                dragContainer.addEventListener('mousemove', (ev: any) => {
-                                        ev.stopPropagation()
-                                        const cursorPos = origin - ev.pageY
-                                       
-                                        let
-                                            z1 = 0,
-                                            z2 = (props.yAxisMap[0].height * 1/3),
-                                            z3 =  (props.yAxisMap[0].height * 1/3)*2,
-                                            z4 =  (props.yAxisMap[0].height * 1/3)*3
-
-                                        const [yA1, yA2] = target;
-                                        
-                                        let domain: any = [];
-                                        if (relativeOrigin > z1 && relativeOrigin <= z2) {
-                                            domain = [
-                                                yA1 , 
-                                                yA2 - (cursorPos * Math.log(5))
-                                            ]
-                                        }
-                                        else if (relativeOrigin > z2 && relativeOrigin <= z3) {
-                                            domain = [//TODO
-                                                yA1 - (cursorPos * (yA1/yA2) ),
-                                                yA2 - (cursorPos * (yA1/yA2) )
-                                            ]
-                                        }
-                                        else if (relativeOrigin > z3 && relativeOrigin <= z4) {
-                                            domain = [
-                                                yA1 - (cursorPos * Math.log(5)), 
-                                                yA2
-                                            ]
-                                        }
-                                        axisDragProps?.onCoordChange(domain)
-                            });
-                                document.body.appendChild(dragContainer);
-                            }}
+                            onMouseDown={(e: any) => dragHandle(e, 'x')}
+                            x={props.xAxisMap[0].x} 
+                            y={props.xAxisMap[0].y} 
+                            width={props.xAxisMap[0].width} 
+                            height={props.height-props.xAxisMap[0].y} 
+                            style={{opacity: 0, cursor: 'e-resize'}}
+                        />
+                        {/* origin */}
+                        <rect 
+                            onMouseDown={(e: any) => dragHandle(e, 'xy')}
+                            x={props.yAxisMap[0].x} 
+                            y={props.xAxisMap[0].y} 
+                            width={props.yAxisMap[0].width} 
+                            height={props.height-props.xAxisMap[0].y} 
+                            style={{opacity: 0, cursor: 'ne-resize'}}
+                        />
+                        {/* y axis */}
+                        <rect 
+                            onMouseDown={(e: any) => dragHandle(e, 'y')}
                             x={props.yAxisMap[0].x} 
                             y={props.yAxisMap[0].y} 
                             width={props.yAxisMap[0].width} 

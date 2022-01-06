@@ -21,8 +21,9 @@ export const ToolBox = (props: ToolBoxProps) => {
     
     const [toolbarComponents, setToolbarComponents] = React.useState(null);
 
-    const [yAxisDomain, setYAxisDomain] = React.useState([20, 110]); 
-    const [xAxisDomain, setXAxisDomain] = React.useState([0, 'auto']);
+    //TODO
+    const [yAxisDomain, setYAxisDomain] = React.useState([80, 130]); 
+    const [xAxisDomain, setXAxisDomain] = React.useState([1451865600, 1483056000]); //TODO: auto
 
     const [zoomState, setZoomState] = React.useState(null)
     const [selectCoords, setSelectCoords] = React.useState(null);
@@ -86,10 +87,15 @@ export const ToolBox = (props: ToolBoxProps) => {
                 }),
                 AxisDragUtil({
                     yAxisDomain,
+                    xAxisDomain,
                     offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0,
-                    onCoordChange: (coords: any) => {
+                    onCoordYChange: (coords: any) => {
                         //TODO disable tooltip, hide toolbar
                         setYAxisDomain(coords)
+                    }, 
+                    onCoordXChange: (coords: any) => {
+                        //TODO disable tooltip, hide toolbar
+                        setXAxisDomain(coords)
                     }, 
                 })
             ]
@@ -105,15 +111,19 @@ export const ToolBox = (props: ToolBoxProps) => {
                     return React.cloneElement(child, { 
                         allowDataOverflow: true, 
                         domain: yAxisDomain,
+                        scale: 'linear'
                     })
                 case "XAxis":
-                    return React.cloneElement(child, { allowDataOverflow: true, })
+                    return React.cloneElement(child, { 
+                        allowDataOverflow: true, 
+                        domain: xAxisDomain
+                    })
                 default:
                     return React.cloneElement(child)
             };
         }
     );
-   
+
     return (
         <div ref={containerRef} style={{position: 'relative'}}>
             <div
