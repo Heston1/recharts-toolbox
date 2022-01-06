@@ -301,21 +301,21 @@ export default class Demo extends Component<any, any> {
             </ToolBar>
 
             <LineChart
-              width={600} height={400} data={data03}
+              width={600} height={400} data={
+                data03
+                  .map((point: any) => (
+                    {
+                      date: parseInt('' + new Date(point.date).getTime()/1000), 
+                      price: point.price
+                    }
+                  ))
+              }
               margin={{ top: 40, right: 40, bottom: 20, left: 20 }}
             >
-                <CartesianGrid vertical={false} />
-                <XAxis  dataKey="date" label="Date"  height={5} />
-                <YAxis  dataKey="price" label="Stock Price" scale={'linear'}/>
-                {/* <Tooltip
-                  wrapperStyle={{
-                    borderColor: 'white',
-                    boxShadow: '2px 2px 3px 0px rgb(204, 204, 204)',
-                  }}
-                  contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
-                  labelStyle={{ fontWeight: 'bold', color: '#666666' }}
-                /> */}
-              
+                <CartesianGrid vertical={true} />
+                {/* <XAxis label="Date" type="number" scale='linear'/> */}
+                <XAxis  dataKey="date" label="Date" type="number" scale='linear'/>
+                <YAxis  dataKey="price" label="Stock Price" scale='linear'/>
                 <Line dataKey="price" stroke="#ff7300" dot={false} isAnimationActive={false} animationDuration={0}/>
               
             </LineChart>

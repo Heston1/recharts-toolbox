@@ -12,7 +12,7 @@ export type Props = ToolBoxProps;
 const uid = () => Date.now().toString(36) + Math.random().toString(36).substring(0,2);
 
 export const ToolBox = (props: ToolBoxProps) => {
-    const toolbox_graph_ref = React.useRef(`toolbox_ref_${uid}`);
+    const toolbox_graph_ref = React.useRef(`toolbox_ref_${uid()}`);
 
     const toolbarRef = React.useRef(null);
     const containerRef = React.useRef(null);
@@ -24,7 +24,7 @@ export const ToolBox = (props: ToolBoxProps) => {
 
     //TODO auto, fn
     const [yAxisDomain, setYAxisDomain]: any = React.useState([20, 120]); 
-    const [xAxisDomain, setXAxisDomain]: any = React.useState([1451865600, 1483056000]);
+    const [xAxisDomain, setXAxisDomain]: any = React.useState([1451865600 - 10000000, 1483056000 - 10000000]);
 
     const [zoomState, setZoomState] = React.useState(null)
     const [selectCoords, setSelectCoords] = React.useState(null);
@@ -83,6 +83,7 @@ export const ToolBox = (props: ToolBoxProps) => {
                     onCoordChange: (coords: any) => setSelectCoords(coords), 
                     setZoomState, 
                     yAxisDomain,
+                    xAxisDomain,
                     offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0
                 }),
                 panState && AxisDragUtil({
@@ -128,6 +129,7 @@ export const ToolBox = (props: ToolBoxProps) => {
                     return React.cloneElement(child, { 
                         allowDataOverflow: true, 
                         domain: xAxisDomain,
+                        scale: 'linear'
                     })
                 default:
                     return React.cloneElement(child)
@@ -175,8 +177,6 @@ export const ToolBox = (props: ToolBoxProps) => {
                 React.cloneElement(
                     parent, 
                     {
-                        data: parent.props.data
-                            .map((point: any) => ({date: new Date(point.date).getTime()/1000, price: point.price})),
                         id: toolbox_graph_ref.current
                     }, 
                     children()

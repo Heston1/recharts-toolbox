@@ -14,7 +14,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
                     const originY = e.pageY;
                     const originX = e.pageX;
                     const relativeOriginY = e.clientY - bbox.top;
-                    const relativeOriginX = e.clientY - bbox.right;
+                    const relativeOriginX = e.clientX - bbox.left;
                     
                     targetY = axisDragProps?.yAxisDomain;
                     targetX = axisDragProps?.xAxisDomain;
@@ -70,9 +70,9 @@ const AxisDragUtil = (axisDragProps: any)  => {
                         const [xA1, xA2] = targetX; 
 
                         const tickSizeY = (yA2-yA1)/props.yAxisMap[0].height;
-                        const tickSizeX = (yA2-yA1)/props.xAxisMap[0].width;
+                        const tickSizeX = (xA2-xA1)/props.xAxisMap[0].width;
                         const distanceY = cursorPosY*tickSizeY;
-                        const distanceX = cursorPosX*tickSizeX;
+                        const distanceX = cursorPosX*tickSizeX  * -1;
                         const log = Math.log(5);
 
                         if (key == 'pan'){  
@@ -110,14 +110,18 @@ const AxisDragUtil = (axisDragProps: any)  => {
                         const a1 = key == 'x' ? xA1 : yA1;
                         const a2 = key == 'x' ? xA2 : yA2;
                         
+                        const 
+                            logz1 = [a1, a2 - (dist * log)], 
+                            logz2 = [a1 - (dist * log), a2];
+
                         if (ro > z1 && ro <= z2) {
-                            domain = [a1, a2 - (dist * log)]
+                            domain = key == 'x' ? logz2 : logz1; 
                         }
                         else if (ro > z2 && ro <= z3) {
-                            domain = [a1 - dist, a2 - dist]
+                            domain = [a1 - dist, a2 - dist];
                         }
                         else if (ro > z3 && ro <= z4) {
-                            domain = [a1 - (dist * log), a2]
+                            domain = key == 'x' ? logz1 : logz2;
                         }
 
                         if (key == 'x') {

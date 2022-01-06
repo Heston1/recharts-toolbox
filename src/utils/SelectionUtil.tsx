@@ -64,6 +64,7 @@ const SelectionUtil = (selectionProps: any)  => {
 
                                 if (selectionProps && selectionProps.yAxisDomain) {
                                     const [yA1, yA2] = selectionProps?.yAxisDomain;
+                                    const [xA1, xA2] = selectionProps?.xAxisDomain;
 
                                     selectionProps?.onCoordChange({
                                         yDomain: [
@@ -72,6 +73,8 @@ const SelectionUtil = (selectionProps: any)  => {
                                         ],
                                         xDomain: [
                                             //TODO
+                                            xA1,
+                                            xA2
                                         ]
                                     })
                                 }
