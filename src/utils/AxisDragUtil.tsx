@@ -14,7 +14,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
                     const originY = e.pageY;
                     const originX = e.pageX;
                     const relativeOriginY = e.clientY - bbox.top;
-                    const relativeOriginX = e.clientY - bbox.top;
+                    const relativeOriginX = e.clientY - bbox.right;
                     
                     targetY = axisDragProps?.yAxisDomain;
                     targetX = axisDragProps?.xAxisDomain;
@@ -30,12 +30,25 @@ const AxisDragUtil = (axisDragProps: any)  => {
                         case 'xy':
                             cursor = 'ne-resize';
                             break;
+                        case 'pan':
+                            cursor = 'all-scroll'
                         default:
                             //invalid key
                             break;
                     }
                     let dragContainer = document.createElement('div');
-                    dragContainer.setAttribute('style', `position:absolute;top:0;bottom:0;left:0;right:0;z-index:10000;cursor:${cursor}`);
+                    dragContainer.setAttribute(
+                        'style', 
+                        `
+                            position:absolute;
+                            top:0;
+                            bottom:0;
+                            left:0;
+                            right:0;
+                            z-index:10000;
+                            cursor:${cursor}
+                        `
+                    );
                     dragContainer.setAttribute('id', 'drag-overlay-root');
                     moving = true;
 
@@ -44,69 +57,91 @@ const AxisDragUtil = (axisDragProps: any)  => {
                         moving = false; //TODO: is this needed when its removed?
                     });
                     dragContainer.addEventListener('mousemove', (ev: any) => {
-                            if (!moving) 
-                                return;
+                        if (!moving) 
+                            return;
 
-                            ev.stopPropagation();
-                            ev.preventDefault();
+                        ev.stopPropagation();
+                        ev.preventDefault();
 
-                            const cursorPosY = originY - ev.pageY;
-                            const cursorPosX = originX - ev.pageX;
+                        const cursorPosY = originY - ev.pageY;
+                        const cursorPosX = originX - ev.pageX;
 
-                            const [yA1, yA2] = targetY; 
-                            const [xA1, xA2] = targetX; 
+                        const [yA1, yA2] = targetY; 
+                        const [xA1, xA2] = targetX; 
 
-                            const tickSizeY = (yA2-yA1)/props.yAxisMap[0].height;
-                            const tickSizeX = (yA2-yA1)/props.xAxisMap[0].width;
-                            const distanceY = cursorPosY*tickSizeY;
-                            const distanceX = cursorPosX*tickSizeX;
-                            const log = Math.log(5);
+                        const tickSizeY = (yA2-yA1)/props.yAxisMap[0].height;
+                        const tickSizeX = (yA2-yA1)/props.xAxisMap[0].width;
+                        const distanceY = cursorPosY*tickSizeY;
+                        const distanceX = cursorPosX*tickSizeX;
+                        const log = Math.log(5);
 
-                            if (key == 'xy') {
-                                const domainY = [yA1 - (distanceY * log), yA2];
-                                const domainX = [xA1 - (distanceX * log), xA2];
+                        if (key == 'pan'){  
+                            const domainY = [yA1 - distanceY, yA2 - distanceY];
+                            const domainX = [xA1 - distanceX, xA2 - distanceX];
 
-                                axisDragProps?.onCoordYChange(domainY);
-                                axisDragProps?.onCoordXChange(domainX);
-                                return;
-                            }
-                           
-                            const axisH = key == 'x' 
-                                ? props.xAxisMap[0].width 
-                                : props.yAxisMap[0].height;
+                            axisDragProps?.onCoordYChange(domainY);
+                            axisDragProps?.onCoordXChange(domainX);
+                            return;
+                        }
 
-                            const
-                                z1 = 0,
-                                z2 = axisH * 1/10,
-                                z3 =  (axisH * 4/5)+z2,
-                                z4 =  (axisH * 1/10)+z3;
-                                
-                            let domain: any = [];
+                        if (key == 'xy') {
+                            const domainY = [yA1 - (distanceY * log), yA2];
+                            const domainX = [xA1 - (distanceX * log), xA2];
 
-                            const ro = key == 'x' ? relativeOriginX : relativeOriginY;
-                            const dist = key == 'x' ? distanceX : distanceY;
-                            const a1 = key == 'x' ? xA1 : yA1;
-                            const a2 = key == 'x' ? xA2 : yA2;
+                            axisDragProps?.onCoordYChange(domainY);
+                            axisDragProps?.onCoordXChange(domainX);
+                            return;
+                        }
+                        
+                        const axisH = key == 'x' 
+                            ? props.xAxisMap[0].width 
+                            : props.yAxisMap[0].height;
+
+                        const
+                            z1 = 0,
+                            z2 = axisH * 1/10,
+                            z3 =  (axisH * 4/5)+z2,
+                            z4 =  (axisH * 1/10)+z3;
                             
-                            if (ro > z1 && ro <= z2) {
-                                domain = [a1, a2 - (dist * log)]
-                            }
-                            else if (ro > z2 && ro <= z3) {
-                                domain = [a1 - dist, a2 - dist]
-                            }
-                            else if (ro > z3 && ro <= z4) {
-                                domain = [a1 - (dist * log), a2]
-                            }
+                        let domain: any = [];
 
-                            if (key == 'x') {
-                                axisDragProps?.onCoordXChange(domain);
-                            } 
-                            else {
-                                axisDragProps?.onCoordYChange(domain);
-                            }
+                        const ro = key == 'x' ? relativeOriginX : relativeOriginY;
+                        const dist = key == 'x' ? distanceX : distanceY;
+                        const a1 = key == 'x' ? xA1 : yA1;
+                        const a2 = key == 'x' ? xA2 : yA2;
+                        
+                        if (ro > z1 && ro <= z2) {
+                            domain = [a1, a2 - (dist * log)]
+                        }
+                        else if (ro > z2 && ro <= z3) {
+                            domain = [a1 - dist, a2 - dist]
+                        }
+                        else if (ro > z3 && ro <= z4) {
+                            domain = [a1 - (dist * log), a2]
+                        }
+
+                        if (key == 'x') {
+                            axisDragProps?.onCoordXChange(domain);
+                        } 
+                        else {
+                            axisDragProps?.onCoordYChange(domain);
+                        }
                           
                     });
                     document.body.appendChild(dragContainer);
+                }
+
+                if (axisDragProps.panState) {
+                    return <g>
+                        <rect
+                            onMouseDown={(e: any) => dragHandle(e, 'pan')}
+                            x={props.yAxisMap[0].width + props.yAxisMap[0].x} 
+                            y={props.yAxisMap[0].y} 
+                            width={props.xAxisMap[0].width} 
+                            height={props.yAxisMap[0].height} 
+                            style={{opacity: 0, cursor: 'all-scroll'}}
+                        />   
+                    </g>
                 }
 
                 return (

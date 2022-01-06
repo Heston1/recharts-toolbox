@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
-import {ToolBox, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, ToolBar} from 'recharts-toolbox';
+import { ToolBox, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, ToolBar } from 'recharts-toolbox';
 import { changeNumberOfData } from './utils';
 import * as _ from 'lodash';
 

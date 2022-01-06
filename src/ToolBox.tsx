@@ -9,10 +9,11 @@ export interface ToolBoxProps {
 }
 export type Props = ToolBoxProps;
 
+const uid = () => Date.now().toString(36) + Math.random().toString(36).substring(0,2);
+
 export const ToolBox = (props: ToolBoxProps) => {
-    const toolbox_graph_ref = React.useRef(
-        `toolbox_ref_${Date.now().toString(36) + Math.random().toString(36).substring(0,2)}`
-    );
+    const toolbox_graph_ref = React.useRef(`toolbox_ref_${uid}`);
+
     const toolbarRef = React.useRef(null);
     const containerRef = React.useRef(null);
     const graphStatetRef = React.useRef(null);
@@ -21,12 +22,14 @@ export const ToolBox = (props: ToolBoxProps) => {
     
     const [toolbarComponents, setToolbarComponents] = React.useState(null);
 
-    //TODO
-    const [yAxisDomain, setYAxisDomain] = React.useState([80, 130]); 
-    const [xAxisDomain, setXAxisDomain] = React.useState([1451865600, 1483056000]); //TODO: auto
+    //TODO auto, fn
+    const [yAxisDomain, setYAxisDomain]: any = React.useState([20, 120]); 
+    const [xAxisDomain, setXAxisDomain]: any = React.useState([1451865600, 1483056000]);
 
     const [zoomState, setZoomState] = React.useState(null)
     const [selectCoords, setSelectCoords] = React.useState(null);
+
+    const [panState, setPanState] = React.useState(false);
 
     const [hasSet, setHasSet] = React.useState(false) //circular
 
@@ -57,7 +60,7 @@ export const ToolBox = (props: ToolBoxProps) => {
     }, []);
     
     //huh??
-    const proxy = (sourceRef: any, dest: any) => (
+    const proxy = () => (//needs to be hoc
         <Customized component={(customizedProps: any) => {
             React.useEffect(() => {
                 graphStatetRef.current = customizedProps
@@ -68,24 +71,32 @@ export const ToolBox = (props: ToolBoxProps) => {
                 }
             }, [customizedProps])
             
-            return sourceRef
-                ? ReactDOM.createPortal(
-                    <></>, dest) 
-                : null
+            return null;
         }}/>
     );
     
     const children = () => parent && React.Children.map(
         parent.props.children.concat(
             [
-                proxy(toolbarComponents, toolbarRef.current),
+                proxy(),
                 zoomState && SelectionUtil({
                     onCoordChange: (coords: any) => setSelectCoords(coords), 
                     setZoomState, 
                     yAxisDomain,
                     offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0
                 }),
-                AxisDragUtil({
+                panState && AxisDragUtil({
+                    panState,
+                    yAxisDomain,
+                    xAxisDomain,
+                    onCoordYChange: (coords: any) => {
+                        setYAxisDomain(coords)
+                    }, 
+                    onCoordXChange: (coords: any) => {
+                        setXAxisDomain(coords)
+                    }, 
+                }),
+                AxisDragUtil({//disable if axis is no difined
                     yAxisDomain,
                     xAxisDomain,
                     offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0,
@@ -116,7 +127,7 @@ export const ToolBox = (props: ToolBoxProps) => {
                 case "XAxis":
                     return React.cloneElement(child, { 
                         allowDataOverflow: true, 
-                        domain: xAxisDomain
+                        domain: xAxisDomain,
                     })
                 default:
                     return React.cloneElement(child)
@@ -150,7 +161,9 @@ export const ToolBox = (props: ToolBoxProps) => {
                                     zoomState,
                                     setZoomState,
                                     selectCoords,
-                                    setSelectCoords
+                                    setSelectCoords,
+                                    panState,
+                                    setPanState
                                 }
                             );
                         })
