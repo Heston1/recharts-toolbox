@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { ToolBox, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, ToolBar } from 'recharts-toolbox';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { ToolBox, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, 
+  ToolBar, TooltipClosest, TooltipCompare } from 'recharts-toolbox';
 import { changeNumberOfData } from './utils';
 import * as _ from 'lodash';
 
@@ -12,15 +13,15 @@ const data03 = [
   { date: 'Jan 08 2016', price: 96.96 },
   { date: 'Jan 11 2016', price: 98.53 },
   { date: 'Jan 12 2016', price: 99.96 },
-  { date: 'Jan 13 2016', price: -97.39 },
-  { date: 'Jan 14 2016', price: -99.52 },
-  { date: 'Jan 15 2016', price: -97.13 },
-  { date: 'Jan 19 2016', price: -96.66 },
-  { date: 'Jan 20 2016', price: -96.79 },
-  { date: 'Jan 21 2016', price: -96.3 },
-  { date: 'Jan 22 2016', price: -101.42 },
-  { date: 'Jan 25 2016', price: -99.44 },
-  { date: 'Jan 26 2016', price: -99.99 },
+  { date: 'Jan 13 2016', price: 97.39 },
+  { date: 'Jan 14 2016', price: 99.52 },
+  { date: 'Jan 15 2016', price: 97.13 },
+  { date: 'Jan 19 2016', price: 96.66 },
+  { date: 'Jan 20 2016', price: 96.79 },
+  { date: 'Jan 21 2016', price: 96.3 },
+  { date: 'Jan 22 2016', price: 101.42 },
+  { date: 'Jan 25 2016', price: 99.44 },
+  { date: 'Jan 26 2016', price: 99.99 },
   { date: 'Jan 27 2016', price: 93.42 },
   { date: 'Jan 28 2016', price: 94.09 },
   { date: 'Jan 29 2016', price: 97.34 },
@@ -290,14 +291,16 @@ export default class Demo extends Component<any, any> {
             <ToolBar 
               displayMode={'visible'}
             >
+              <Camera/>
+
               <ZoomSelect />
               <ZoomIn />
               <ZoomOut />
               <Pan />
               <AutoScale />
               <Reset />
-
-              <Camera/>
+              <TooltipClosest />
+              <TooltipCompare />
             </ToolBar>
 
             <LineChart
@@ -305,8 +308,9 @@ export default class Demo extends Component<any, any> {
                 data03
                   .map((point: any) => (
                     {
-                      date: parseInt('' + new Date(point.date).getTime()/1000), 
-                      price: point.price
+                      date: new Date(point.date).getTime()/1000, 
+                      price: point.price,
+                      target: 105.35,
                     }
                   ))
               }
@@ -315,9 +319,9 @@ export default class Demo extends Component<any, any> {
                 <CartesianGrid vertical={true} />
                 {/* <XAxis label="Date" type="number" scale='linear'/> */}
                 <XAxis  dataKey="date" label="Date" type="number" scale='linear'/>
-                <YAxis  dataKey="price" label="Stock Price" scale='linear'/>
+                <YAxis  label="Stock Price" scale='linear'/>
                 <Line dataKey="price" stroke="#ff7300" dot={false} isAnimationActive={false} animationDuration={0}/>
-              
+                <Line dataKey="target" stroke="green" dot={false} isAnimationActive={false} animationDuration={0}/>
             </LineChart>
           </ToolBox>
         </div>

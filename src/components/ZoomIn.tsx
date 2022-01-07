@@ -1,16 +1,22 @@
 import React from 'react'
 
 export const ZoomIn = (props: any) => {
-    const {yAxisDomain, setYAxisDomain} = props;
+    const {yAxisDomain, setYAxisDomain, setXAxisDomain, xAxisDomain} = props;
     
     const zoomFunction = (e: any) => {
-        const diff = Math.abs(yAxisDomain[1] - yAxisDomain[0]);
+        const diffy = Math.abs(yAxisDomain[1] - yAxisDomain[0]);
+        const diffx = Math.abs(xAxisDomain[1] - xAxisDomain[0]);
 
         //use scaling function passed from props
-        const scale = (((diff)/2)/Math.log(5))  //huh??
-        const x = yAxisDomain[0] + scale;
-        const y = yAxisDomain[1] - scale;
-        setYAxisDomain([x, y])
+        const scaley = (((diffy)/2)/Math.log(5))  //TODO: avoid dividing by 2
+        const scalex = (((diffx)/2)/Math.log(5)) 
+
+        const y1 = yAxisDomain[0] + scaley;
+        const y2 = yAxisDomain[1] - scaley;
+        setYAxisDomain([y1, y2])
+        const x1 = xAxisDomain[0] + scalex;
+        const x2 = xAxisDomain[1] - scalex;
+        setXAxisDomain([x1, x2])
     };
 
     return (

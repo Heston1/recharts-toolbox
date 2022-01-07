@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Customized } from 'recharts';
 import AxisDragUtil from './utils/AxisDragUtil';
 import SelectionUtil from './utils/SelectionUtil';
+import TooltipUtil from './utils/TooltipUtil';
 
 export interface ToolBoxProps {
     children: JSX.Element | JSX.Element[] | string;
@@ -23,8 +24,8 @@ export const ToolBox = (props: ToolBoxProps) => {
     const [toolbarComponents, setToolbarComponents] = React.useState(null);
 
     //TODO auto, fn
-    const [yAxisDomain, setYAxisDomain]: any = React.useState([20, 120]); 
-    const [xAxisDomain, setXAxisDomain]: any = React.useState([1451865600 - 10000000, 1483056000 - 10000000]);
+    const [yAxisDomain, setYAxisDomain]: any = React.useState([60, 140]); 
+    const [xAxisDomain, setXAxisDomain]: any = React.useState([1451865600, 1483056000]);
 
     const [zoomState, setZoomState] = React.useState(null)
     const [selectCoords, setSelectCoords] = React.useState(null);
@@ -32,6 +33,9 @@ export const ToolBox = (props: ToolBoxProps) => {
     const [panState, setPanState] = React.useState(false);
 
     const [hasSet, setHasSet] = React.useState(false) //circular
+
+    const [tooltipMode, setTooltipMode] = React.useState('closest');
+    const [tooltipCoord, setTooltipCoord] = React.useState(null);
 
     React.useEffect(() => {
         const setComponents = (child: any) => {
@@ -64,6 +68,7 @@ export const ToolBox = (props: ToolBoxProps) => {
         <Customized component={(customizedProps: any) => {
             React.useEffect(() => {
                 graphStatetRef.current = customizedProps
+                // console.log(customizedProps)
                 if (hasSet == false) {
                     setHasSet(true)
                 } else {
@@ -79,6 +84,12 @@ export const ToolBox = (props: ToolBoxProps) => {
         parent.props.children.concat(
             [
                 proxy(),
+                TooltipUtil({
+                    mode: tooltipMode,
+                    onCoordChange: (payload: any) => {
+                        setTooltipCoord(payload)
+                    }
+                }),
                 zoomState && SelectionUtil({
                     onCoordChange: (coords: any) => setSelectCoords(coords), 
                     setZoomState, 
@@ -109,7 +120,8 @@ export const ToolBox = (props: ToolBoxProps) => {
                         //TODO disable tooltip, hide toolbar
                         setXAxisDomain(coords)
                     }, 
-                })
+                }),
+               
             ]
         ), 
         child => {
@@ -139,6 +151,7 @@ export const ToolBox = (props: ToolBoxProps) => {
 
     return (
         <div ref={containerRef} style={{position: 'relative'}}>
+           
             <div
                 ref={toolbarRef} 
                 style={{
@@ -160,12 +173,16 @@ export const ToolBox = (props: ToolBoxProps) => {
                                     graph_uid: toolbox_graph_ref.current,
                                     yAxisDomain, 
                                     setYAxisDomain,
+                                    xAxisDomain, 
+                                    setXAxisDomain,
                                     zoomState,
                                     setZoomState,
                                     selectCoords,
                                     setSelectCoords,
                                     panState,
-                                    setPanState
+                                    setPanState,
+                                    tooltipMode,
+                                    setTooltipMode
                                 }
                             );
                         })
@@ -181,6 +198,39 @@ export const ToolBox = (props: ToolBoxProps) => {
                     }, 
                     children()
                 )
+            }
+
+            {/* tooltip test to remove */}
+            {tooltipCoord && 
+                <div 
+                    style={{
+                        position: 'absolute', 
+                        top: tooltipCoord.y, 
+                        left: tooltipCoord.x + 10,
+                        background: 'white',
+                        
+                        border: '1px solid #666',
+                        padding: 10,
+                        color: '#666',
+                        zIndex: 10001
+                    }}
+                >
+                    <div style={{marginBottom: 5}}>
+                        {tooltipCoord.payload.date}
+                    </div>
+                    <div>
+                        {tooltipMode == 'compare' &&
+                            Object.keys(tooltipCoord.payload)
+                                .filter(key => key != 'date')
+                                .map(key => 
+                                    <div>{key}: {tooltipCoord.payload[key]}</div>
+                                )
+                        }
+                        {tooltipMode == 'closest' && 
+                            <div> {tooltipCoord.value}</div>
+                        }
+                    </div>
+                </div>
             }
         </div>
     );

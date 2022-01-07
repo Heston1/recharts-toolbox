@@ -72,9 +72,8 @@ const SelectionUtil = (selectionProps: any)  => {
                                             (yA2 - ( (yA2 - yA1) * (y1 - props.yAxisMap[0].y)/(props.yAxisMap[0].height) ) ) ,
                                         ],
                                         xDomain: [
-                                            //TODO
-                                            xA1,
-                                            xA2
+                                            (xA1 - ( (xA1 - xA2) * (x1 - props.xAxisMap[0].x)/(props.xAxisMap[0].width) ) ) ,
+                                            (xA1 - ( (xA1 - xA2) * (x2 - props.xAxisMap[0].x)/(props.xAxisMap[0].width) ) ) ,
                                         ]
                                     })
                                 }

@@ -1,6 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
-// const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const TerserPlugin = require('terser-webpack-plugin');
 
 const env = process.env.NODE_ENV;
@@ -63,11 +63,11 @@ const config = {
   ],
 };
 
-// if (env === 'analyse') {
-//   config.plugins.push(
-//     new BundleAnalyzerPlugin()
-//   );
-// }
+if (env === 'analyse') {
+  config.plugins.push(
+    new BundleAnalyzerPlugin()
+  );
+}
 
 if (env === 'production') {
   config.mode = 'production';
