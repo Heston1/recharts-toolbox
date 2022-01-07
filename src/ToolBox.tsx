@@ -23,8 +23,7 @@ export const ToolBox = (props: ToolBoxProps) => {
     
     const [toolbarComponents, setToolbarComponents] = React.useState(null);
 
-    //TODO auto, fn
-    const [yAxisDomain, setYAxisDomain]: any = React.useState([60, 140]); 
+    const [yAxisDomain, setYAxisDomain]: any = React.useState(['auto', 'auto']); 
     const [xAxisDomain, setXAxisDomain]: any = React.useState([1451865600, 1483056000]);
 
     const [zoomState, setZoomState] = React.useState(null)
@@ -84,6 +83,7 @@ export const ToolBox = (props: ToolBoxProps) => {
         parent.props.children.concat(
             [
                 proxy(),
+                //TODO merge to use the same overlay
                 TooltipUtil({
                     mode: tooltipMode,
                     onCoordChange: (payload: any) => {
@@ -97,18 +97,8 @@ export const ToolBox = (props: ToolBoxProps) => {
                     xAxisDomain,
                     offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0
                 }),
-                panState && AxisDragUtil({
-                    panState,
-                    yAxisDomain,
-                    xAxisDomain,
-                    onCoordYChange: (coords: any) => {
-                        setYAxisDomain(coords)
-                    }, 
-                    onCoordXChange: (coords: any) => {
-                        setXAxisDomain(coords)
-                    }, 
-                }),
                 AxisDragUtil({//disable if axis is no difined
+                    panState,
                     yAxisDomain,
                     xAxisDomain,
                     offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0,

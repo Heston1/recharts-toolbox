@@ -1,5 +1,6 @@
 import React from 'react';
 import { Customized } from 'recharts';
+import { resolveAxis } from './helpers';
 
 let select_wasMoved = false;
 const SelectionUtil = (selectionProps: any)  => {
@@ -56,27 +57,25 @@ const SelectionUtil = (selectionProps: any)  => {
 
                                 selectionProps?.setZoomState(false);
                                 
-                                //TODO
                                 const x1 = start.x < end.x ? start.x : end.x;
                                 const y1 = start.y < end.y ? start.y : end.y;
                                 const x2 = start.x > end.x ? start.x : end.x;
                                 const y2 = start.y > end.y ? start.y : end.y;
 
-                                if (selectionProps && selectionProps.yAxisDomain) {
-                                    const [yA1, yA2] = selectionProps?.yAxisDomain;
-                                    const [xA1, xA2] = selectionProps?.xAxisDomain;
+                                const [yA1, yA2] = resolveAxis(props, selectionProps.yAxisDomain);
+                                const [xA1, xA2] = selectionProps.xAxisDomain;
 
-                                    selectionProps?.onCoordChange({
-                                        yDomain: [
-                                            (yA2 - ( (yA2 - yA1) * (y2 - props.yAxisMap[0].y)/(props.yAxisMap[0].height) ) ) ,
-                                            (yA2 - ( (yA2 - yA1) * (y1 - props.yAxisMap[0].y)/(props.yAxisMap[0].height) ) ) ,
-                                        ],
-                                        xDomain: [
-                                            (xA1 - ( (xA1 - xA2) * (x1 - props.xAxisMap[0].x)/(props.xAxisMap[0].width) ) ) ,
-                                            (xA1 - ( (xA1 - xA2) * (x2 - props.xAxisMap[0].x)/(props.xAxisMap[0].width) ) ) ,
-                                        ]
-                                    })
-                                }
+                                selectionProps?.onCoordChange({
+                                    yDomain: [
+                                        (yA2 - ( (yA2 - yA1) * (y2 - props.yAxisMap[0].y)/(props.yAxisMap[0].height) ) ) ,
+                                        (yA2 - ( (yA2 - yA1) * (y1 - props.yAxisMap[0].y)/(props.yAxisMap[0].height) ) ) ,
+                                    ],
+                                    xDomain: [
+                                        (xA1 - ( (xA1 - xA2) * (x1 - props.xAxisMap[0].x)/(props.xAxisMap[0].width) ) ) ,
+                                        (xA1 - ( (xA1 - xA2) * (x2 - props.xAxisMap[0].x)/(props.xAxisMap[0].width) ) ) ,
+                                    ]
+                                })
+                                
                                 
                             }}
                             x={props.yAxisMap[0].width + props.yAxisMap[0].x} 

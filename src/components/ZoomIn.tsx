@@ -1,18 +1,20 @@
 import React from 'react'
+import { resolveAxis } from '../utils/helpers';
 
 export const ZoomIn = (props: any) => {
     const {yAxisDomain, setYAxisDomain, setXAxisDomain, xAxisDomain} = props;
     
     const zoomFunction = (e: any) => {
-        const diffy = Math.abs(yAxisDomain[1] - yAxisDomain[0]);
+        const yDomain = resolveAxis(props, yAxisDomain);
+        const diffy = Math.abs(yDomain[1] - yDomain[0]);
         const diffx = Math.abs(xAxisDomain[1] - xAxisDomain[0]);
 
         //use scaling function passed from props
         const scaley = (((diffy)/2)/Math.log(5))  //TODO: avoid dividing by 2
         const scalex = (((diffx)/2)/Math.log(5)) 
 
-        const y1 = yAxisDomain[0] + scaley;
-        const y2 = yAxisDomain[1] - scaley;
+        const y1 = yDomain[0] + scaley;
+        const y2 = yDomain[1] - scaley;
         setYAxisDomain([y1, y2])
         const x1 = xAxisDomain[0] + scalex;
         const x2 = xAxisDomain[1] - scalex;

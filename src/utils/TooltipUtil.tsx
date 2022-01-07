@@ -8,7 +8,7 @@ const TooltipUtil = (tooltipProps: any)  => {
                 const handle = (e: any) => {
                     e.persist();
                     const bbox = e.target.getBoundingClientRect();
-                    const OUT_OF_BOUNDS_RADIUS = 10; //TODO: should be tick size
+                    const tickSize = 10; //TODO: should be tick size
                     
                     const relY = e.clientY - bbox.top;
                     const relX = e.clientX - bbox.left;
@@ -16,7 +16,7 @@ const TooltipUtil = (tooltipProps: any)  => {
                     let points: any;
                     
                     //ideas for speeding this up
-                    // - calc start and end of graph, if the cursor is not within bounds return
+                    // - calc bb of graph, if the cursor is not within bounds return
                     switch (tooltipProps.mode) {
                         case 'closest':
                             points = props.formattedGraphicalItems.reduce(
@@ -29,7 +29,7 @@ const TooltipUtil = (tooltipProps: any)  => {
                             points = props.formattedGraphicalItems.reduce(
                                 (acc: any, items: any) => {
                                     if (acc.length == 0) {
-                                        return acc.concat(items.props.points);
+                                        return items.props.points;
                                     } else {
                                         return acc.map(
                                             (point: any, i: number) => 
@@ -54,7 +54,7 @@ const TooltipUtil = (tooltipProps: any)  => {
                         }
                     });
 
-                    if (Math.abs(minDist) > OUT_OF_BOUNDS_RADIUS) {
+                    if (Math.abs(minDist) > tickSize) {
                         tooltipProps.onCoordChange(null);
                     } else {
                         //TODO use same api as recharts

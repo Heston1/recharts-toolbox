@@ -1,5 +1,6 @@
 import React from 'react';
 import { Customized } from 'recharts';
+import { resolveAxis } from './helpers';
 
 let targetY: any, targetX: any, moving = false;
 const AxisDragUtil = (axisDragProps: any)  => {
@@ -65,8 +66,8 @@ const AxisDragUtil = (axisDragProps: any)  => {
 
                         const cursorPosY = originY - ev.pageY;
                         const cursorPosX = originX - ev.pageX;
-
-                        const [yA1, yA2] = targetY; 
+                        
+                        const [yA1, yA2] = resolveAxis(props, targetY); 
                         const [xA1, xA2] = targetX; 
 
                         const tickSizeY = (yA2-yA1)/props.yAxisMap[0].height;
@@ -123,7 +124,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
                         else if (ro > z3 && ro <= z4) {
                             domain = key == 'x' ? logz1 : logz2;
                         }
-
+                        
                         if (key == 'x') {
                             axisDragProps?.onCoordXChange(domain);
                         } 
