@@ -54,6 +54,7 @@ const TooltipUtil = (tooltipProps: any)  => {
 
         if (Math.abs(minDist) > tickSize) {
             tooltipProps.onCoordChange(null);
+            setReferenceLines(null);
         } else {
             //TODO use same api as recharts
             tooltipProps.onCoordChange(points[index]);
@@ -63,7 +64,7 @@ const TooltipUtil = (tooltipProps: any)  => {
 
     const leaveHandle = (e: any) => {
         tooltipProps.onCoordChange(null);
-        tooltipProps.setEnableReferenceLines(false);
+        setReferenceLines(null);
     }
     const referenceBox = 20; //TODO font size
     return (
