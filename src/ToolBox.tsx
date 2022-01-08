@@ -38,6 +38,8 @@ export const ToolBox = (props: ToolBoxProps) => {
     const [tooltipMode, setTooltipMode] = React.useState('closest'); //closest, compare
     const [tooltipCoord, setTooltipCoord] = React.useState(null);
 
+    const [enableReferenceLines, setEnableReferenceLines] = React.useState(false)
+
     React.useEffect(() => {
         const setComponents = (child: any) => {
             switch (child.type.name) {
@@ -85,36 +87,6 @@ export const ToolBox = (props: ToolBoxProps) => {
         parent.props.children.concat(
             [
                 proxy(),
-                //TODO merge to use the same overlay
-                TooltipUtil({//TODO: should always display
-                    mode: tooltipMode,
-                    onCoordChange: (payload: any) => {
-                        setTooltipCoord(payload)
-                    }
-                }),
-                selectState && SelectionUtil({
-                    mode: selectState,
-                    onCoordChange: (coords: any) => setSelectCoords(coords), 
-                    setSelectState, 
-                    yAxisDomain,
-                    xAxisDomain,
-                    offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0
-                }),
-                AxisDragUtil({//disable if axis is no difined
-                    panState,
-                    yAxisDomain,
-                    xAxisDomain,
-                    offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0,
-                    onCoordYChange: (coords: any) => {
-                        //TODO disable tooltip, hide toolbar
-                        setYAxisDomain(coords)
-                    }, 
-                    onCoordXChange: (coords: any) => {
-                        //TODO disable tooltip, hide toolbar
-                        setXAxisDomain(coords)
-                    }, 
-                }),
-               
             ]
         ), 
         child => {
@@ -177,7 +149,9 @@ export const ToolBox = (props: ToolBoxProps) => {
                                                     panState,
                                                     setPanState,
                                                     tooltipMode,
-                                                    setTooltipMode
+                                                    setTooltipMode,
+                                                    enableReferenceLines, 
+                                                    setEnableReferenceLines
                                                 }
                                             );
                                         })
@@ -199,6 +173,53 @@ export const ToolBox = (props: ToolBoxProps) => {
                 )
             }
 
+            {/* is this really slower than adding it to customized? */}
+            {/* drag layer */}
+            {(graphStatetRef.current && hasSet) && 
+                //TODO: needs to be component
+                <svg width="600" height="400" viewBox='0 0 600 400' style={{position: 'absolute', top: 0, left: 0}}>
+
+                    <TooltipUtil {...{
+                        graphProps: graphStatetRef.current,
+                        mode: tooltipMode,
+                        tooltipCoord,
+                        onCoordChange: (payload: any) => {
+                            setTooltipCoord(payload);
+                        },
+                        setEnableReferenceLines,
+                        enableReferenceLines,
+                    }}/>
+
+                    <AxisDragUtil {...{
+                        graphProps: graphStatetRef.current,
+                        panState,
+                        yAxisDomain,
+                        xAxisDomain,
+                        offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0,
+                        onCoordYChange: (coords: any) => {
+                            //TODO disable tooltip, hide toolbar
+                            setYAxisDomain(coords)
+                        }, 
+                        onCoordXChange: (coords: any) => {
+                            //TODO disable tooltip, hide toolbar
+                            setXAxisDomain(coords)
+                        }, 
+                    }}/>
+
+                    {selectState && <SelectionUtil {...{
+                        graphProps: graphStatetRef.current,
+                        mode: selectState,
+                        onCoordChange: (coords: any) => setSelectCoords(coords), 
+                        setSelectState, 
+                        yAxisDomain,
+                        xAxisDomain,
+                        offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0
+                    }} />}
+                </svg>
+                
+            }  
+
+            {/* tooltip layer */}
             {tooltipCoord &&  <CustomTooltip {...{tooltipMode, tooltipCoord}}/> }
         </div>
     );

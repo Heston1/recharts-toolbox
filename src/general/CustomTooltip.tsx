@@ -7,7 +7,7 @@ export const CustomTooltip = (props: any) => {
         <div 
             style={{
                 position: 'absolute', 
-                top: tooltipCoord.y, 
+                top: tooltipCoord.y + 10, 
                 left: tooltipCoord.x + 10,
                 background: 'white',
                 

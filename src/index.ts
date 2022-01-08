@@ -18,10 +18,13 @@ export { TooltipClosest } from './components/TooltipClosest';
 export { TooltipCompare } from './components/TooltipCompare';
 
 //TODO
-// export { CartesianLines } from './components/CartesianLines';
-// export { ToggleHover } from './components/ToggleHover';
+export { ReferenceLines } from './components/ReferenceLines';
 export { DrawTool } from './components/DrawTool';
+
 export { Export } from './components/Export';
 export type {Props as ExportProps} from './ToolBox';
+
 export { Reset } from './components/Reset';
 export { AutoScale } from './components/AutoScale';
+
+//click/hover toggle
