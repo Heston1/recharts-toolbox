@@ -15,7 +15,7 @@ export const ToolBar = (props: any) => {
     const [hover, setHover] = React.useState(false);
 
     React.useEffect(() => {
-        if (toolbarRef?.current && prevDimentions != toolbarDimentions) {
+        if (toolbarRef?.current) {// && prevDimentions != toolbarDimentions
             const current = toolbarRef.current
             setToolbarDimentions({width: current.offsetWidth, height: current.offsetHeight});
         }
@@ -32,9 +32,8 @@ export const ToolBar = (props: any) => {
             ref={toolbarRef}
             style={{
                 position: 'absolute',
-                display: displayMode == 'hidden' ? 'none' : 'flex', 
-                flexDirection: 'column', 
-                flexWrap: 'wrap', 
+                display:  'flex', //displayMode == 'hidden' ? 'none' :
+                flexFlow: 'column wrap-reverse',
                 gap: '10px', 
                 cursor: 'pointer',
                 marginTop: customizedProps.yAxisMap[0].y + 5,
@@ -45,6 +44,7 @@ export const ToolBar = (props: any) => {
                     - toolbarDimentions.width
                     - 5
                 ),
+                height: customizedProps.yAxisMap[0].height,
                 zIndex: 10,
                 opacity: displayMode == 'hover' && !hover ? 0: 1,
                 ...style

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { ToolBox, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, 
-  ToolBar, TooltipClosest, TooltipCompare } from 'recharts-toolbox';
+  ToolBar, TooltipClosest, TooltipCompare, BoxSelect, LasoSelect, DrawTool } from 'recharts-toolbox';
 import { changeNumberOfData } from './utils';
 import * as _ from 'lodash';
 
@@ -301,6 +301,9 @@ export default class Demo extends Component<any, any> {
               <Reset />
               <TooltipClosest />
               <TooltipCompare />
+              <BoxSelect onSelected={(points: any) => console.log(points)}/>
+              <LasoSelect onSelected={(points: any) => console.log(points)}/>
+              <DrawTool />
             </ToolBar>
 
             <LineChart

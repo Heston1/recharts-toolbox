@@ -1,9 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Customized } from 'recharts';
+import { CustomTooltip } from './general/CustomTooltip';
 import AxisDragUtil from './utils/AxisDragUtil';
 import SelectionUtil from './utils/SelectionUtil';
 import TooltipUtil from './utils/TooltipUtil';
+import { withFading } from './utils/withFading';
 
 export interface ToolBoxProps {
     children: JSX.Element | JSX.Element[] | string;
@@ -24,16 +26,16 @@ export const ToolBox = (props: ToolBoxProps) => {
     const [toolbarComponents, setToolbarComponents] = React.useState(null);
 
     const [yAxisDomain, setYAxisDomain]: any = React.useState(['auto', 'auto']); 
-    const [xAxisDomain, setXAxisDomain]: any = React.useState([1451865600, 1483056000]);
+    const [xAxisDomain, setXAxisDomain]: any = React.useState([1451865600, 1483056000]); // 1451865600, 1483056000
 
-    const [zoomState, setZoomState] = React.useState(null)
+    const [selectState, setSelectState] = React.useState(null); //zoom, select, laso
     const [selectCoords, setSelectCoords] = React.useState(null);
 
     const [panState, setPanState] = React.useState(false);
 
     const [hasSet, setHasSet] = React.useState(false) //circular
 
-    const [tooltipMode, setTooltipMode] = React.useState('closest');
+    const [tooltipMode, setTooltipMode] = React.useState('closest'); //closest, compare
     const [tooltipCoord, setTooltipCoord] = React.useState(null);
 
     React.useEffect(() => {
@@ -84,15 +86,16 @@ export const ToolBox = (props: ToolBoxProps) => {
             [
                 proxy(),
                 //TODO merge to use the same overlay
-                TooltipUtil({
+                TooltipUtil({//TODO: should always display
                     mode: tooltipMode,
                     onCoordChange: (payload: any) => {
                         setTooltipCoord(payload)
                     }
                 }),
-                zoomState && SelectionUtil({
+                selectState && SelectionUtil({
+                    mode: selectState,
                     onCoordChange: (coords: any) => setSelectCoords(coords), 
-                    setZoomState, 
+                    setSelectState, 
                     yAxisDomain,
                     xAxisDomain,
                     offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0
@@ -142,43 +145,49 @@ export const ToolBox = (props: ToolBoxProps) => {
     return (
         <div ref={containerRef} style={{position: 'relative'}}>
            
-            <div
-                ref={toolbarRef} 
-                style={{
-                    position: 'absolute', 
-                    top: 0, right: 0,left: 0, bottom: 0
-                }} 
-            >
-                {(graphStatetRef.current && hasSet) && 
-                    React.cloneElement(
-                        toolbarComponents,
-                        {
-                            customizedProps: graphStatetRef.current,
-                        },
-                        React.Children.map(toolbarComponents.props.children, child => {
-                            return React.cloneElement(
-                                child, 
-                                {
-                                    ...graphStatetRef.current, 
-                                    graph_uid: toolbox_graph_ref.current,
-                                    yAxisDomain, 
-                                    setYAxisDomain,
-                                    xAxisDomain, 
-                                    setXAxisDomain,
-                                    zoomState,
-                                    setZoomState,
-                                    selectCoords,
-                                    setSelectCoords,
-                                    panState,
-                                    setPanState,
-                                    tooltipMode,
-                                    setTooltipMode
-                                }
-                            );
-                        })
-                    )
-                }   
-            </div>
+            {   
+                withFading({
+                    element: <div
+                                ref={toolbarRef} 
+                                style={{
+                                    position: 'absolute', 
+                                    top: 0, right: 0,left: 0, bottom: 0
+                                }} 
+                            >
+                                {(graphStatetRef.current && hasSet) && 
+                                    React.cloneElement(
+                                        toolbarComponents,
+                                        {
+                                            customizedProps: graphStatetRef.current,
+                                        },
+                                        React.Children.map(toolbarComponents.props.children, child => {
+                                            return React.cloneElement(
+                                                child, 
+                                                {
+                                                    ...graphStatetRef.current, 
+                                                    graph_uid: toolbox_graph_ref.current,
+                                                    yAxisDomain, 
+                                                    setYAxisDomain,
+                                                    xAxisDomain, 
+                                                    setXAxisDomain,
+                                                    selectState,
+                                                    setSelectState,
+                                                    selectCoords,
+                                                    setSelectCoords,
+                                                    panState,
+                                                    setPanState,
+                                                    tooltipMode,
+                                                    setTooltipMode
+                                                }
+                                            );
+                                        })
+                                    )
+                                }   
+                            </div>,
+                    duration: 0.5,
+                    isOut: false
+                })
+            }
 
             {parent &&
                 React.cloneElement(
@@ -190,38 +199,7 @@ export const ToolBox = (props: ToolBoxProps) => {
                 )
             }
 
-            {/* tooltip test to remove */}
-            {tooltipCoord && 
-                <div 
-                    style={{
-                        position: 'absolute', 
-                        top: tooltipCoord.y, 
-                        left: tooltipCoord.x + 10,
-                        background: 'white',
-                        
-                        border: '1px solid #666',
-                        padding: 10,
-                        color: '#666',
-                        zIndex: 10001
-                    }}
-                >
-                    <div style={{marginBottom: 5}}>
-                        {tooltipCoord.payload.date}
-                    </div>
-                    <div>
-                        {tooltipMode == 'compare' &&
-                            Object.keys(tooltipCoord.payload)
-                                .filter(key => key != 'date')
-                                .map(key => 
-                                    <div>{key}: {tooltipCoord.payload[key]}</div>
-                                )
-                        }
-                        {tooltipMode == 'closest' && 
-                            <div> {tooltipCoord.value}</div>
-                        }
-                    </div>
-                </div>
-            }
+            {tooltipCoord &&  <CustomTooltip {...{tooltipMode, tooltipCoord}}/> }
         </div>
     );
 };

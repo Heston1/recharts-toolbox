@@ -5,7 +5,7 @@ export const AutoScale  = (props: any) => {
 
     const handleAutoSize = (e: any) => {
         setYAxisDomain(['auto', 'auto'])
-        //TODO handle x axis
+        // setXAxisDomain(['auto', 'auto'])
     }
 
     // https://icons.getbootstrap.com/icons/aspect-ratio/

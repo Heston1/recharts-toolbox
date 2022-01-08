@@ -31,6 +31,15 @@ const AxisDragUtil = (axisDragProps: any)  => {
                         case 'xy':
                             cursor = 'ne-resize';
                             break;
+                        case 'y-end':
+                            cursor = 'se-resize';
+                            break;
+                        case 'x-end':
+                            cursor = 'nw-resize';
+                            break;
+                        case 'xy-end':
+                            cursor = 'sw-resize';
+                            break;
                         case 'pan':
                             cursor = 'all-scroll'
                         default:
@@ -61,15 +70,15 @@ const AxisDragUtil = (axisDragProps: any)  => {
                         if (!moving) 
                             return;
 
-                        ev.stopPropagation();
-                        ev.preventDefault();
+                        // ev.stopPropagation();
+                        // ev.preventDefault();
 
                         const cursorPosY = originY - ev.pageY;
                         const cursorPosX = originX - ev.pageX;
                         
                         const [yA1, yA2] = resolveAxis(props, targetY); 
-                        const [xA1, xA2] = targetX; 
-
+                        const [xA1, xA2] = resolveAxis(props, targetX); 
+                       
                         const tickSizeY = (yA2-yA1)/props.yAxisMap[0].height;
                         const tickSizeX = (xA2-xA1)/props.xAxisMap[0].width;
                         const distanceY = cursorPosY*tickSizeY;
@@ -88,6 +97,30 @@ const AxisDragUtil = (axisDragProps: any)  => {
                         if (key == 'xy') {
                             const domainY = [yA1 - (distanceY * log), yA2];
                             const domainX = [xA1 - (distanceX * log), xA2];
+
+                            axisDragProps?.onCoordYChange(domainY);
+                            axisDragProps?.onCoordXChange(domainX);
+                            return;
+                        }
+                        if (key == 'xy-end') {
+                            const domainY = [yA1, yA2 - (distanceY * log)];
+                            const domainX = [xA1 , xA2 - (distanceX * log)];
+
+                            axisDragProps?.onCoordYChange(domainY);
+                            axisDragProps?.onCoordXChange(domainX);
+                            return;
+                        }
+                        if (key == 'y-end') {
+                            const domainY = [yA1 , yA2 - (distanceY * log)];
+                            const domainX = [xA1 - (distanceX * log), xA2];
+
+                            axisDragProps?.onCoordYChange(domainY);
+                            axisDragProps?.onCoordXChange(domainX);
+                            return;
+                        }
+                        if (key == 'x-end') {
+                            const domainY = [yA1 - (distanceY * log), yA2];
+                            const domainX = [xA1 , xA2 - (distanceX * log)];
 
                             axisDragProps?.onCoordYChange(domainY);
                             axisDragProps?.onCoordXChange(domainX);
@@ -124,7 +157,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
                         else if (ro > z3 && ro <= z4) {
                             domain = key == 'x' ? logz1 : logz2;
                         }
-                        
+
                         if (key == 'x') {
                             axisDragProps?.onCoordXChange(domain);
                         } 
@@ -151,7 +184,6 @@ const AxisDragUtil = (axisDragProps: any)  => {
 
                 return (
                     <g>
-                        {/* TODO apply to multiple axis, this only applies to the first x and y axis currently */}
                         {/* x axis */}
                         <rect 
                             onMouseDown={(e: any) => dragHandle(e, 'x')}
@@ -178,6 +210,33 @@ const AxisDragUtil = (axisDragProps: any)  => {
                             width={props.yAxisMap[0].width} 
                             height={props.yAxisMap[0].height} 
                             style={{opacity: 0, cursor: 'n-resize'}}
+                        />
+                        {/* xy */}
+                        <rect 
+                            onMouseDown={(e: any) => dragHandle(e, 'xy-end')}
+                            x={props.xAxisMap[0].width + props.xAxisMap[0].x} 
+                            y={0} 
+                            width={props.width - props.yAxisMap[0].width + props.yAxisMap[0].x} 
+                            height={props.yAxisMap[0].y} 
+                            style={{opacity: 0, cursor: 'sw-resize'}}
+                        />
+                        {/* y end */}
+                        <rect 
+                            onMouseDown={(e: any) => dragHandle(e, 'y-end')}
+                            x={props.yAxisMap[0].x} 
+                            y={0} 
+                            width={props.yAxisMap[0].width} 
+                            height={props.yAxisMap[0].y} 
+                            style={{opacity: 0, cursor: 'se-resize'}}
+                        />
+                        {/* x end */}
+                        <rect 
+                            onMouseDown={(e: any) => dragHandle(e, 'x-end')}
+                            x={props.xAxisMap[0].width + props.xAxisMap[0].x} 
+                            y={props.xAxisMap[0].y} 
+                            width={props.width - (props.yAxisMap[0].x + props.xAxisMap[0].width)} 
+                            height={props.height - props.xAxisMap[0].y} 
+                            style={{opacity: 0, cursor: 'nw-resize'}}
                         />
                     </g>
                 )
