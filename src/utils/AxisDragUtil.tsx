@@ -206,6 +206,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
 
             if (key == 'x') {
                 axisDragProps?.onCoordXChange(domain);
+                calculateTimeSeriesTicks(5, domain)
             } 
             else {
                 axisDragProps?.onCoordYChange(domain);
