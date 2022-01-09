@@ -164,7 +164,8 @@ export const ToolBox = (props: ToolBoxProps) => {
                                                     tooltipMode,
                                                     setTooltipMode,
                                                     enableReferenceLines, 
-                                                    setEnableReferenceLines
+                                                    setEnableReferenceLines,
+                                                    setTicks,
                                                 }
                                             );
                                         })
@@ -218,7 +219,7 @@ export const ToolBox = (props: ToolBoxProps) => {
                             setXAxisDomain(coords)
                         }, 
                         ticks,
-                        calculateTimeSeriesTicks: (ticks: any) => setTicks(ticks)
+                        setTicks
                     }}/>
 
                     {selectState && <SelectionUtil {...{

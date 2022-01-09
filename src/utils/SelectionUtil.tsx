@@ -1,5 +1,5 @@
 import React from 'react';
-import { resolveAxis } from './helpers';
+import { resolveAxis, isInPolygon } from './helpers';
 
 let select_wasMoved = false;
 const SelectionUtil = (selectionProps: any)  => {
@@ -102,20 +102,6 @@ const SelectionUtil = (selectionProps: any)  => {
     const onLasoMouseUp = (e: any) => {
         select_wasMoved = false;
 
-        //https://wrf.ecse.rpi.edu/Research/Short_Notes/pnpoly.html
-        //n is the number of points in the polygon, a ray is cast between px,py from the x,y position, 
-        //each time the ray intersects the polygon c switches indicating inside or outside
-        const isInPolygon = (n: number, px: any, py: any, x: number, y: number) => {
-            let i: any, j: any = n-1, c = false;
-            for (i = 0; i < n; j = i++) {
-                if (((py[i]>y) != (py[j]>y)) &&
-                        (x < (px[j]-px[i]) * (y-py[i]) / (py[j]-py[i]) + px[i])) {
-                    c = !c
-                }
-                
-            }
-            return c;
-        }
         selectionProps?.onCoordChange({
             type: 'laso',
             selectedPoints: props.formattedGraphicalItems

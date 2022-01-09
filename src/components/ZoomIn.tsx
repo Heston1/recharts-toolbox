@@ -1,8 +1,8 @@
 import React from 'react'
-import { resolveAxis } from '../utils/helpers';
+import { calculateTimeSeriesTicks, resolveAxis } from '../utils/helpers';
 
 export const ZoomIn = (props: any) => {
-    const {yAxisDomain, setYAxisDomain, setXAxisDomain, xAxisDomain} = props;
+    const {yAxisDomain, setYAxisDomain, setXAxisDomain, xAxisDomain, setTicks} = props;
     
     const zoomFunction = (e: any) => {
         const yDomain = resolveAxis(props, yAxisDomain);
@@ -20,6 +20,7 @@ export const ZoomIn = (props: any) => {
         const x1 = xDomain[0] + scalex;
         const x2 = xDomain[1] - scalex;
         setXAxisDomain([x1, x2])
+        calculateTimeSeriesTicks(5, xAxisDomain, [x1, x2], setTicks);
     };
 
     return (
