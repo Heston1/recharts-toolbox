@@ -264,8 +264,12 @@ const data03 = [
 const initialState = {
   opacity: 1,
   anotherState: false,
+  data: data03,
+  date: 0,
+  price: 115.82,
+  isrealtime: false
 };
-
+let realTimeSim: any;
 export default class Demo extends Component<any, any> {
 
   static displayName = 'LineChartDemo';
@@ -287,6 +291,30 @@ export default class Demo extends Component<any, any> {
       <div className="line-charts">
 
         <div className="line-chart-wrapper">
+          <button onClick={e => {
+              //TODO track button for real time
+              this.setState({isrealtime: !this.state.isrealtime}, () => {
+                if (this.state.isrealtime) {
+                  realTimeSim = setInterval(() => {
+                    if (this.state.date == 512) {
+                      clearInterval(realTimeSim);
+                      realTimeSim = null;
+                      return;
+                    }
+                    const date = this.state.date + 1;
+                    const lastentry = this.state.data[this.state.data.length-1].price;
+                    const price = parseFloat((Math.random() * ((lastentry + 3) - (lastentry - 3) + 1) + (lastentry - 3)).toFixed(2));
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    //you may see missing points because its dividing by 30 and not alternating by month
+                    const data = this.state.data.concat([{ date: `${months[parseInt('' + (date/30))]} ${date%30} 2017`, price}])
+                    this.setState({ date,price,data});
+                  }, 3000);
+                } else {
+                  clearInterval(realTimeSim);
+                  realTimeSim = null;
+                }
+              });
+          }}>{this.state.isrealtime ? 'stop real time' : 'start real time'}</button>
           <ToolBox>
 
             <ToolBar 
@@ -311,7 +339,7 @@ export default class Demo extends Component<any, any> {
 
             <LineChart
               width={600} height={400} data={
-                data03
+                this.state.data
                   .map((point: any) => (
                     {
                       date: new Date(point.date).getTime()/1000, 
@@ -324,8 +352,8 @@ export default class Demo extends Component<any, any> {
             >
                 <CartesianGrid vertical={true} />
                 {/* <XAxis label="Date" type="number" scale='linear'/> */}
-                <XAxis  dataKey="date" label="Date" type="number" scale='linear'/>
-                <YAxis  label="Stock Price" scale='linear'/>
+                <XAxis dataKey="date" label="Date" />
+                <YAxis  label="Stock Price"/>
                 <Line dataKey="price" stroke="#ff7300" dot={false} isAnimationActive={false} animationDuration={0}/>
                 <Line dataKey="target" stroke="green" dot={false} isAnimationActive={false} animationDuration={0}/>
             </LineChart>

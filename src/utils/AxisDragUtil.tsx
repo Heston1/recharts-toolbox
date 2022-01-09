@@ -1,10 +1,56 @@
 import React from 'react';
 import { resolveAxis } from './helpers';
 
-let targetY: any, targetX: any, moving = false;
+let targetY: any, targetX: any, moving = false, lastX: any = [], ticks: any = [];
 const AxisDragUtil = (axisDragProps: any)  => {
     //TODO handle category
     const props = axisDragProps.graphProps;
+
+    //TODO use for zoom in/out, zoom select
+    //TODO preserve start, end, startend
+    const calculateTimeSeriesTicks = (tickCount: number = 5, domain: any) => {
+        // let ticks: any = axisDragProps?.ticks; //why does this add to the previous state????
+        if (lastX.length == 0) {
+            lastX = targetX;
+        }
+        const x1 = lastX[0];
+        const x2 = lastX[1];
+        if (ticks.length == 0) {
+            let tmp = []
+            for (let numTick = 0; numTick < tickCount; numTick++) {
+                tmp.push((x1+(((x2-x1)/tickCount)*numTick)));
+            }
+            ticks = tmp
+        } 
+
+        if (ticks[ticks.length-1] < domain[1]) {
+            ticks.push(ticks[ticks.length-1]+((x2-x1)/tickCount));
+        } 
+        else {
+            ticks.pop()
+        }
+        
+        if (ticks[0] > domain[0]) {
+            ticks.unshift((ticks[0]-(((x2-x1)/tickCount))));
+        } 
+        else {
+            ticks.shift()
+        }
+
+        //TODO use min tick gap instead of 0.75/1.5
+        if (
+            ((lastX[1]-lastX[0])/tickCount<((domain[1]-domain[0])/tickCount)*0.75)
+            || ((lastX[1]-lastX[0])/tickCount>((domain[1]-domain[0])/tickCount)*1.5)
+        ){
+            let tmp = []
+            for (let numTick = 0; numTick < tickCount; numTick++) {
+                tmp.push((domain[0]+(((domain[1]-domain[0])/tickCount)*numTick)));
+            }
+            ticks = tmp
+            lastX = domain
+        }
+        axisDragProps.calculateTimeSeriesTicks(ticks);
+    }
 
     const dragHandle = (e: any, key: string) => {
         e.persist();
@@ -67,10 +113,8 @@ const AxisDragUtil = (axisDragProps: any)  => {
         dragContainer.addEventListener('mousemove', (ev: any) => {
             if (!moving) 
                 return;
-
             // ev.stopPropagation();
             // ev.preventDefault();
-
             const cursorPosY = originY - ev.pageY;
             const cursorPosX = originX - ev.pageX;
             
@@ -89,6 +133,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
 
                 axisDragProps?.onCoordYChange(domainY);
                 axisDragProps?.onCoordXChange(domainX);
+                calculateTimeSeriesTicks(5, domainX)
                 return;
             }
 
@@ -98,6 +143,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
 
                 axisDragProps?.onCoordYChange(domainY);
                 axisDragProps?.onCoordXChange(domainX);
+                calculateTimeSeriesTicks(5, domainX)
                 return;
             }
             if (key == 'xy-end') {
@@ -106,6 +152,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
 
                 axisDragProps?.onCoordYChange(domainY);
                 axisDragProps?.onCoordXChange(domainX);
+                calculateTimeSeriesTicks(5, domainX)
                 return;
             }
             if (key == 'y-end') {
@@ -122,6 +169,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
 
                 axisDragProps?.onCoordYChange(domainY);
                 axisDragProps?.onCoordXChange(domainX);
+                calculateTimeSeriesTicks(5, domainX)
                 return;
             }
             

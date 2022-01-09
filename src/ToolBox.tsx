@@ -38,7 +38,9 @@ export const ToolBox = (props: ToolBoxProps) => {
     const [tooltipMode, setTooltipMode] = React.useState('closest'); //closest, compare
     const [tooltipCoord, setTooltipCoord] = React.useState(null);
 
-    const [enableReferenceLines, setEnableReferenceLines] = React.useState(false)
+    const [enableReferenceLines, setEnableReferenceLines] = React.useState(false);
+
+    const [ticks, setTicks] = React.useState([])
 
     React.useEffect(() => {
         const setComponents = (child: any) => {
@@ -64,18 +66,22 @@ export const ToolBox = (props: ToolBoxProps) => {
             //TODO render other
             setParent(null) //toolbar or chart not a child
         }   
-    }, []);
-    
-    //huh??
-    const proxy = () => (//needs to be hoc
+
+        //TODO ohhh AxisDragUtil:12
+        let tmp = [], x1 = xAxisDomain[0], x2 = xAxisDomain[1],tickCount = 5;
+        for (let numTick = 0; numTick < tickCount; numTick++) {
+            tmp.push((x1+(((x2-x1)/tickCount)*numTick)));
+        }
+        setTicks(tmp)
+    }, [props.children]);
+
+    const proxy = () => (
         <Customized component={(customizedProps: any) => {
             React.useEffect(() => {
                 graphStatetRef.current = customizedProps
                 // console.log(customizedProps)
                 if (hasSet == false) {
                     setHasSet(true)
-                } else {
-                    return;
                 }
             }, [customizedProps])
             
@@ -106,7 +112,14 @@ export const ToolBox = (props: ToolBoxProps) => {
                     return React.cloneElement(child, { 
                         allowDataOverflow: true, 
                         domain: xAxisDomain,
-                        scale: 'linear'
+                        scale: 'linear',
+                        type: 'number',
+                        ticks,
+                        interval: 0,
+                        tickFormatter: (tick: any) => {
+                            //TODo change based on granularity
+                            return new Date(tick.toFixed(0)*1000).toLocaleDateString('en-US');
+                        }
                     })
                 default:
                     return React.cloneElement(child)
@@ -204,6 +217,8 @@ export const ToolBox = (props: ToolBoxProps) => {
                             //TODO disable tooltip, hide toolbar
                             setXAxisDomain(coords)
                         }, 
+                        ticks,
+                        calculateTimeSeriesTicks: (ticks: any) => setTicks(ticks)
                     }}/>
 
                     {selectState && <SelectionUtil {...{
