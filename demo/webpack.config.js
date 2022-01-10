@@ -19,7 +19,7 @@ module.exports = {
   ],
   resolve: {
     alias: {
-      "recharts-toolbox": path.join(__dirname, '..', 'src/index.ts')
+      "recharts-toolkit": path.join(__dirname, '..', 'src/index.ts')
     },
     extensions: ['.json', '.js', '.jsx', '.ts', '.tsx'],
   },

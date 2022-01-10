@@ -1,21 +1,21 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Customized } from 'recharts';
 import { CustomTooltip } from './general/CustomTooltip';
 import AxisDragUtil from './utils/AxisDragUtil';
+import { formatTimeSeriesTicks } from './utils/helpers';
 import SelectionUtil from './utils/SelectionUtil';
 import TooltipUtil from './utils/TooltipUtil';
 import { withFading } from './utils/withFading';
 
-export interface ToolBoxProps {
+export interface ToolkitProps {
     children: JSX.Element | JSX.Element[] | string;
 }
-export type Props = ToolBoxProps;
+export type Props = ToolkitProps;
 
 const uid = () => Date.now().toString(36) + Math.random().toString(36).substring(0,2);
 
-export const ToolBox = (props: ToolBoxProps) => {
-    const toolbox_graph_ref = React.useRef(`toolbox_ref_${uid()}`);
+export const Toolkit = (props: ToolkitProps) => {
+    const toolkit_graph_ref = React.useRef(`toolkit_ref_${uid()}`);
 
     const toolbarRef = React.useRef(null);
     const containerRef = React.useRef(null);
@@ -43,6 +43,15 @@ export const ToolBox = (props: ToolBoxProps) => {
     const [ticks, setTicks] = React.useState([])
 
     React.useEffect(() => {
+        //TODO remove
+        let tmp = [], x1 = xAxisDomain[0], x2 = xAxisDomain[1],tickCount = 5;
+        for (let numTick = 0; numTick < tickCount; numTick++) {
+            tmp.push((x1+(((x2-x1)/tickCount)*numTick)));
+        }
+        setTicks(tmp)
+    }, [])
+
+    React.useEffect(() => {
         const setComponents = (child: any) => {
             switch (child.type.name) {
                 case 'CategoricalChartWrapper':
@@ -67,12 +76,7 @@ export const ToolBox = (props: ToolBoxProps) => {
             setParent(null) //toolbar or chart not a child
         }   
 
-        //TODO ohhh AxisDragUtil:12
-        let tmp = [], x1 = xAxisDomain[0], x2 = xAxisDomain[1],tickCount = 5;
-        for (let numTick = 0; numTick < tickCount; numTick++) {
-            tmp.push((x1+(((x2-x1)/tickCount)*numTick)));
-        }
-        setTicks(tmp)
+        
     }, [props.children]);
 
     const proxy = () => (
@@ -99,7 +103,7 @@ export const ToolBox = (props: ToolBoxProps) => {
             if (child == null) {
                 return;
             }
-            //Acts as middleware to inject toolbox props into recharts components
+            //Acts as middleware to inject toolkit props into recharts components
             //TODO handle non-integer keys, datetime etc.
             switch (child.type.displayName) {
                 case "YAxis":
@@ -117,8 +121,10 @@ export const ToolBox = (props: ToolBoxProps) => {
                         ticks,
                         interval: 0,
                         tickFormatter: (tick: any) => {
-                            //TODo change based on granularity
-                            return new Date(tick.toFixed(0)*1000).toLocaleDateString('en-US');
+                            const date = new Date(tick.toFixed(0)*1000);
+                            const interval = ((xAxisDomain[1]-xAxisDomain[0])/5);
+                            
+                            return formatTimeSeriesTicks(interval, date);
                         }
                     })
                 default:
@@ -150,7 +156,7 @@ export const ToolBox = (props: ToolBoxProps) => {
                                                 child, 
                                                 {
                                                     ...graphStatetRef.current, 
-                                                    graph_uid: toolbox_graph_ref.current,
+                                                    graph_uid: toolkit_graph_ref.current,
                                                     yAxisDomain, 
                                                     setYAxisDomain,
                                                     xAxisDomain, 
@@ -165,6 +171,7 @@ export const ToolBox = (props: ToolBoxProps) => {
                                                     setTooltipMode,
                                                     enableReferenceLines, 
                                                     setEnableReferenceLines,
+                                                    ticks,
                                                     setTicks,
                                                 }
                                             );
@@ -181,7 +188,7 @@ export const ToolBox = (props: ToolBoxProps) => {
                 React.cloneElement(
                     parent, 
                     {
-                        id: toolbox_graph_ref.current
+                        id: toolkit_graph_ref.current
                     }, 
                     children()
                 )
@@ -191,7 +198,12 @@ export const ToolBox = (props: ToolBoxProps) => {
             {/* drag layer */}
             {(graphStatetRef.current && hasSet) && 
                 //TODO: needs to be component
-                <svg width="600" height="400" viewBox='0 0 600 400' style={{position: 'absolute', top: 0, left: 0}}>
+                <svg 
+                    width={graphStatetRef.current.width} 
+                    height={graphStatetRef.current.height} 
+                    viewBox={`0 0 ${graphStatetRef.current.width} ${graphStatetRef.current.height}`} 
+                    style={{position: 'absolute', top: 0, left: 0}}
+                >
 
                     <TooltipUtil {...{
                         graphProps: graphStatetRef.current,

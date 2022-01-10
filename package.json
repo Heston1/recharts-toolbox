@@ -1,12 +1,12 @@
 {
-  "name": "recharts-toolbox",
+  "name": "recharts-toolkit",
   "version": "0.1.0",
   "description": "Interactive graphing tools for recharts",
   "main": "lib/index.js",
   "module": "es6/index",
   "jsnext:main": "es6/index",
   "types": "types/index.d.ts",
-  "repository": "https://github.com/Heston1/recharts-toolbox.git",
+  "repository": "https://github.com/Heston1/recharts-toolkit.git",
   "author": "Heston1 <71839259+Heston1@users.noreply.github.com>",
   "license": "MIT",
   "sideEffects": false,
@@ -25,7 +25,7 @@
     "chart",
     "react-component",
     "react-tools",
-    "react-toolbox"
+    "react-toolkit"
   ],
   "scripts": {
     "build": "rimraf types && npm run build-cjs && npm run build-es6 && rimraf umd && npm run build-umd",

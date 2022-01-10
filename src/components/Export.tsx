@@ -11,6 +11,20 @@ export const Export = (props: ExportProps) => {
 
     //TODO csv, json
     const exportToFile = (e: any) => {
+        // let header = arrayHeader.join(delimiter) + '\n';
+        // let csv = header;
+        // arrayData.forEach( array => {
+        //     csv += array.join(delimiter)+"\n";
+        // });
+
+        // let csvData = new Blob([csv], { type: 'text/csv' });  
+        // let csvUrl = URL.createObjectURL(csvData);
+
+        // let hiddenElement = document.createElement('a');
+        // hiddenElement.href = csvUrl;
+        // hiddenElement.target = '_blank';
+        // hiddenElement.download = 'download.csv';
+        // hiddenElement.click();
     }
 
     //https://icons.getbootstrap.com/icons/file-earmark-arrow-down/

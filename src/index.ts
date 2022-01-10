@@ -1,5 +1,5 @@
-export { ToolBox } from './ToolBox';
-export type {Props as ToolBoxProps} from './ToolBox';
+export { Toolkit } from './Toolkit';
+export type {Props as ToolkitProps} from './Toolkit';
 
 export { Camera } from './components/Camera';
 export type {Props as CameraProps} from './components/Camera';
@@ -22,7 +22,7 @@ export { ReferenceLines } from './components/ReferenceLines';
 export { DrawTool } from './components/DrawTool';
 
 export { Export } from './components/Export';
-export type {Props as ExportProps} from './ToolBox';
+export type {Props as ExportProps} from './Toolkit';
 
 export { Reset } from './components/Reset';
 export { AutoScale } from './components/AutoScale';

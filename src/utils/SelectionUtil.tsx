@@ -1,7 +1,7 @@
 import React from 'react';
 import { resolveAxis, isInPolygon } from './helpers';
 
-let select_wasMoved = false;
+let select_wasMoved = false, maskInterval: any;
 const SelectionUtil = (selectionProps: any)  => {
     //TODO handle padding/margin, other offsets
     const props = selectionProps.graphProps;
@@ -10,13 +10,24 @@ const SelectionUtil = (selectionProps: any)  => {
     const [path, setPath] = React.useState("");
     const [vYmap, setVYMAP] = React.useState([])
     const [vXmap, setVXMAP] = React.useState([])
+    const [maskOpacity, setMaskOpacity] = React.useState(0);
+
+    React.useEffect(() => {
+        if (maskOpacity > 0.3) {
+            clearInterval(maskInterval);
+            maskInterval = null;
+            return;
+        }
+    }, [maskOpacity])
 
     const onMouseDown = (e: any) => {
         setStart(null); setEnd(null);
         const bbox = e.target.getBoundingClientRect();
         
         setStart({x: e.clientX - selectionProps.offsetLeft, y: e.clientY - bbox.top + props.yAxisMap[0].y}); 
-        
+        maskInterval = setInterval(() => {
+            setMaskOpacity(prev => prev+0.01);
+        }, 2);
         select_wasMoved = true;
     }
 
@@ -29,6 +40,8 @@ const SelectionUtil = (selectionProps: any)  => {
     }
 
     const onMouseUp = (e: any) => {
+        setMaskOpacity(0);
+
         const bbox = e.target.getBoundingClientRect();
 
         setEnd({x: e.clientX - selectionProps.offsetLeft, y: e.clientY - bbox.top + props.yAxisMap[0].y});
@@ -187,6 +200,7 @@ const SelectionUtil = (selectionProps: any)  => {
         return (
             <g>
                 <mask id="selection_mask">
+                    
                     <rect 
                         x={props.yAxisMap[0].width + props.yAxisMap[0].x} 
                         y={props.yAxisMap[0].y} 
@@ -213,7 +227,7 @@ const SelectionUtil = (selectionProps: any)  => {
                     y={props.yAxisMap[0].y} 
                     width={props.xAxisMap[0].width} 
                     height={props.yAxisMap[0].height} 
-                    style={{opacity: select_wasMoved ? 0.3 : 0, cursor: 'crosshair'}}
+                    style={{opacity: maskOpacity, cursor: 'crosshair'}}
                     mask="url(#selection_mask)" 
                 />
                 

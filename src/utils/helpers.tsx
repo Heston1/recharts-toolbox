@@ -48,6 +48,7 @@ export const isInPolygon = (n: number, px: any, py: any, x: number, y: number) =
 //TODO use for zoom in/out, zoom select
 //TODO preserve start, end, startend
 //TODO fix have initial domain
+//move this to toolkit file and listen for domain changes
 /**
  * 
  * @param tickCount 
@@ -55,16 +56,16 @@ export const isInPolygon = (n: number, px: any, py: any, x: number, y: number) =
  */
 let lastX: any = [], ticks: any = [];
 export const calculateTimeSeriesTicks = (tickCount: number = 5, initialDomian:any, domain: any, callback: any) => {
-    // let ticks: any = axisDragProps?.ticks; //why does this add to the previous state????
     if (lastX.length == 0) {
         lastX = initialDomian;
     }
+
     const x1 = lastX[0];
     const x2 = lastX[1];
     if (ticks.length == 0) {
         let tmp = []
         for (let numTick = 0; numTick < tickCount; numTick++) {
-            tmp.push((x1+(((x2-x1)/tickCount)*numTick)));
+            tmp.push((x1+((x2-x1)/tickCount)*numTick));
         }
         ticks = tmp
     } 
@@ -72,19 +73,18 @@ export const calculateTimeSeriesTicks = (tickCount: number = 5, initialDomian:an
     if (ticks[ticks.length-1] < domain[1]) {
         ticks.push(ticks[ticks.length-1]+((x2-x1)/tickCount));
     } 
-    else {
+    if (ticks[ticks.length-1] > domain[1]) {
         ticks.pop()
     }
-    
     if (ticks[0] > domain[0]) {
-        ticks.unshift((ticks[0]-(((x2-x1)/tickCount))));
-    } 
-    else {
+        ticks.unshift(ticks[0]-(((x2-x1)/tickCount)));
+    }
+    if (ticks[0] < domain[0]) {
         ticks.shift()
     }
 
     //TODO use min tick gap instead of 0.75/1.5
-    if (
+    if (//reset when gap is less than 0.75 the width of the interval
         ((lastX[1]-lastX[0])/tickCount<((domain[1]-domain[0])/tickCount)*0.75)
         || ((lastX[1]-lastX[0])/tickCount>((domain[1]-domain[0])/tickCount)*1.5)
     ){
@@ -97,4 +97,44 @@ export const calculateTimeSeriesTicks = (tickCount: number = 5, initialDomian:an
     }
 
     callback(ticks);
+}
+
+/**
+ * 
+ * @param interval 
+ * @param date 
+ * @returns 
+ */
+export const formatTimeSeriesTicks = (interval: any, date: Date) => {
+    const min = 60;
+    const hour = 60*min;
+    const day = 24*hour;
+    const week = day*7;
+    const month = (52*week)/12;
+    const year = (12*month);
+
+    const formattedMilli = ("000" + date.getMilliseconds()).slice(-4);
+    const formattedSec = ("0" + date.getSeconds()).slice(-2);
+    const formattedMin =  ("0" + date.getMinutes()).slice(-2);
+    const formattedHour = ("0" + date.getHours()).slice(-2)
+
+    const toLocaleDateString = (options: any) =>  date.toLocaleDateString(navigator.language, options);
+
+    if (interval < min){
+        return formattedSec + ':' + formattedMilli;
+    } else if (interval > min && interval < hour) {
+        return formattedMin + ':' + formattedSec;
+    } else if (interval > hour && interval < day) {
+        return toLocaleDateString({ day: 'numeric' }) + ", " + formattedHour + ':' + formattedMin;
+    } else if (interval > day && interval < week) {
+        return toLocaleDateString({ day: 'numeric', month: 'short' });
+    } else if (interval > week && interval < month) {
+        return toLocaleDateString({ day: 'numeric', month: 'short' });
+    } else if (interval > month && interval < year) {
+        return toLocaleDateString({ month: 'numeric', year: '2-digit' });
+    } else if (interval > year) {
+        return toLocaleDateString({ year: '2-digit' });
+    } else {
+        return toLocaleDateString(null);
+    }
 }

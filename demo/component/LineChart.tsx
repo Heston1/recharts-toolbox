@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { ToolBox, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, 
+import { Toolkit, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, 
   ToolBar, TooltipClosest, TooltipCompare, BoxSelect, LasoSelect,
-   DrawTool, Export, ReferenceLines } from 'recharts-toolbox';
+   DrawTool, Export, ReferenceLines } from 'recharts-toolkit';
 import { changeNumberOfData } from './utils';
 import * as _ from 'lodash';
 
@@ -315,7 +315,7 @@ export default class Demo extends Component<any, any> {
                 }
               });
           }}>{this.state.isrealtime ? 'stop real time' : 'start real time'}</button>
-          <ToolBox>
+          <Toolkit>
 
             <ToolBar 
               displayMode={'visible'}
@@ -332,9 +332,9 @@ export default class Demo extends Component<any, any> {
               <TooltipCompare />
               <BoxSelect onSelected={(points: any) => console.log(points)}/>
               <LasoSelect onSelected={(points: any) => console.log(points)}/>
-              {/* <DrawTool /> */}
               <ReferenceLines />
               <Export />
+              <DrawTool />
             </ToolBar>
 
             <LineChart
@@ -344,20 +344,19 @@ export default class Demo extends Component<any, any> {
                     {
                       date: new Date(point.date).getTime()/1000, 
                       price: point.price,
-                      target: 105.35,
+                      target: 250-point.price*Math.log(5),
                     }
                   ))
               }
               margin={{ top: 40, right: 40, bottom: 20, left: 20 }}
             >
                 <CartesianGrid vertical={true} />
-                {/* <XAxis label="Date" type="number" scale='linear'/> */}
                 <XAxis dataKey="date" label="Date" />
                 <YAxis  label="Stock Price"/>
                 <Line dataKey="price" stroke="#ff7300" dot={false} isAnimationActive={false} animationDuration={0}/>
                 <Line dataKey="target" stroke="green" dot={false} isAnimationActive={false} animationDuration={0}/>
             </LineChart>
-          </ToolBox>
+          </Toolkit>
         </div>
 
       </div>
