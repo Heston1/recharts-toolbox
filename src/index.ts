@@ -26,5 +26,5 @@ export type {Props as ExportProps} from './Toolkit';
 
 export { Reset } from './components/Reset';
 export { AutoScale } from './components/AutoScale';
-
+export { Ruler } from './components/Ruler';
 //click/hover toggle

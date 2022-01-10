@@ -115,6 +115,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
 
                 axisDragProps?.onCoordYChange(domainY);
                 axisDragProps?.onCoordXChange(domainX);
+                calculateTimeSeriesTicks(5, targetX, domainX, axisDragProps.setTicks);
                 return;
             }
             if (key == 'x-end') {

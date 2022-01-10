@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { Toolkit, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, 
   ToolBar, TooltipClosest, TooltipCompare, BoxSelect, LasoSelect,
-   DrawTool, Export, ReferenceLines } from 'recharts-toolkit';
+   DrawTool, Export, ReferenceLines, Ruler } from 'recharts-toolkit';
 import { changeNumberOfData } from './utils';
 import * as _ from 'lodash';
 
@@ -335,6 +335,7 @@ export default class Demo extends Component<any, any> {
               <ReferenceLines />
               <Export />
               <DrawTool />
+              <Ruler />
             </ToolBar>
 
             <LineChart
@@ -353,8 +354,8 @@ export default class Demo extends Component<any, any> {
                 <CartesianGrid vertical={true} />
                 <XAxis dataKey="date" label="Date" />
                 <YAxis  label="Stock Price"/>
-                <Line dataKey="price" stroke="#ff7300" dot={false} isAnimationActive={false} animationDuration={0}/>
-                <Line dataKey="target" stroke="green" dot={false} isAnimationActive={false} animationDuration={0}/>
+                <Line dataKey="price" stroke="#ff7300" dot={false} />
+                <Line dataKey="target" stroke="green" dot={false} />
             </LineChart>
           </Toolkit>
         </div>

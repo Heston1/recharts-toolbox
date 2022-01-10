@@ -175,7 +175,7 @@ const SelectionUtil = (selectionProps: any)  => {
                         stroke: "black", 
                         strokeWidth: 1,
                         strokeOpacity: 1,
-                        fill: 'none',
+                        fillOpacity: 0.1,
                     }}
                 />}
                 <rect 
@@ -193,6 +193,10 @@ const SelectionUtil = (selectionProps: any)  => {
     }
 
     if (selectionProps.mode == "draw") {
+        //TODO
+    }
+
+    if (selectionProps.mode == "ruler") {
         //TODO
     }
 

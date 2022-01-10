@@ -5,6 +5,7 @@ import AxisDragUtil from './utils/AxisDragUtil';
 import { formatTimeSeriesTicks } from './utils/helpers';
 import SelectionUtil from './utils/SelectionUtil';
 import TooltipUtil from './utils/TooltipUtil';
+// import usePrevious from './utils/usePrevious';
 import { withFading } from './utils/withFading';
 
 export interface ToolkitProps {
@@ -27,6 +28,8 @@ export const Toolkit = (props: ToolkitProps) => {
 
     const [yAxisDomain, setYAxisDomain]: any = React.useState(['auto', 'auto']); 
     const [xAxisDomain, setXAxisDomain]: any = React.useState([1451865600, 1483056000]); // 1451865600, 1483056000
+    // const prevXAxisDomain = usePrevious(xAxisDomain);
+    // const prevYAxisDomain = usePrevious(yAxisDomain);
 
     const [selectState, setSelectState] = React.useState(null); //zoom, select, laso
     const [selectCoords, setSelectCoords] = React.useState(null);
@@ -126,6 +129,11 @@ export const Toolkit = (props: ToolkitProps) => {
                             
                             return formatTimeSeriesTicks(interval, date);
                         }
+                    })
+                case "Line": 
+                    return React.cloneElement(child, { 
+                        //TODO disable dots when moving cause its causing performance issues when there are lots of them
+                        // dot: (prevXAxisDomain != xAxisDomain || prevYAxisDomain != yAxisDomain) ? null : true
                     })
                 default:
                     return React.cloneElement(child)
