@@ -2,20 +2,23 @@ import React from 'react';
 import { Customized } from 'recharts';
 import { CustomTooltip } from './general/CustomTooltip';
 import AxisDragUtil from './utils/AxisDragUtil';
-import { formatTimeSeriesTicks } from './utils/helpers';
+import { formatTimeSeriesTicks, resolveAxis } from './utils/helpers';
 import SelectionUtil from './utils/SelectionUtil';
 import TooltipUtil from './utils/TooltipUtil';
 // import usePrevious from './utils/usePrevious';
 import { withFading } from './utils/withFading';
+import { withResponsiveContainer } from './withResponsiveContainer';
 
 export interface ToolkitProps {
     children: JSX.Element | JSX.Element[] | string;
+    width: number;
+    height: number;
 }
 export type Props = ToolkitProps;
 
 const uid = () => Date.now().toString(36) + Math.random().toString(36).substring(0,2);
 
-export const Toolkit = (props: ToolkitProps) => {
+export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     const toolkit_graph_ref = React.useRef(`toolkit_ref_${uid()}`);
 
     const toolbarRef = React.useRef(null);
@@ -46,14 +49,16 @@ export const Toolkit = (props: ToolkitProps) => {
     const [ticks, setTicks] = React.useState([])
 
     React.useEffect(() => {
-        //TODO remove
-        let tmp = [], x1 = xAxisDomain[0], x2 = xAxisDomain[1],tickCount = 5;
+        //TODO HANDLE THIS!!!
+        const xAxis = resolveAxis(graphStatetRef.current, xAxisDomain);
+
+        let tmp = [], x1 = xAxis[0], x2 = xAxis[1], tickCount = 5;
         for (let numTick = 0; numTick < tickCount; numTick++) {
             tmp.push((x1+(((x2-x1)/tickCount)*numTick)));
         }
         setTicks(tmp)
     }, [])
-
+    
     React.useEffect(() => {
         const setComponents = (child: any) => {
             switch (child.type.name) {
@@ -64,8 +69,13 @@ export const Toolkit = (props: ToolkitProps) => {
                     setToolbarComponents(child);
                     break;
                 default:
-                    //TODO handle other components
+                    if (child.type.name == null && child.props.children instanceof Object) {
+                        if (child.props.children?.type.name == "CategoricalChartWrapper") {
+                            setParent(child.props.children)
+                        }
+                    } 
                     break;
+                    //TODO should we ignore others?
             }
         }
         if (props.children instanceof Array) {
@@ -75,8 +85,8 @@ export const Toolkit = (props: ToolkitProps) => {
         } else if (props.children instanceof Object) {
             setComponents(props.children);
         } else {
-            //TODO render other
-            setParent(null) //toolbar or chart not a child
+            setParent(null);
+            console.warn("CategoricalChartWrapper is not a child of Toolkit.")
         }   
 
         
@@ -87,6 +97,7 @@ export const Toolkit = (props: ToolkitProps) => {
             React.useEffect(() => {
                 graphStatetRef.current = customizedProps
                 // console.log(customizedProps)
+                
                 if (hasSet == false) {
                     setHasSet(true)
                 }
@@ -103,20 +114,17 @@ export const Toolkit = (props: ToolkitProps) => {
             ]
         ), 
         child => {
-            if (child == null) {
+            if (child == null) {//TODO load proxy first
                 return;
             }
+           
             //Acts as middleware to inject toolkit props into recharts components
             //TODO handle non-integer keys, datetime etc.
-            switch (child.type.displayName) {
-                case "YAxis":
-                    return React.cloneElement(child, { 
-                        allowDataOverflow: true, 
-                        domain: yAxisDomain,
-                        scale: 'linear'
-                    })
-                case "XAxis":
-                    return React.cloneElement(child, { 
+         
+            const xAxisConfig = (child: any) => {
+                
+                if (child.props.type == "time" || child.props.type == "number") {
+                    return {
                         allowDataOverflow: true, 
                         domain: xAxisDomain,
                         scale: 'linear',
@@ -124,13 +132,35 @@ export const Toolkit = (props: ToolkitProps) => {
                         ticks,
                         interval: 0,
                         tickFormatter: (tick: any) => {
-                            const date = new Date(tick.toFixed(0)*1000);
-                            const interval = ((xAxisDomain[1]-xAxisDomain[0])/5);
+                            if (child.props.type == "time") {
+                                const date = new Date(tick.toFixed(0)*1000);
+                                const interval = ((xAxisDomain[1]-xAxisDomain[0])/5);
+                                
+                                return formatTimeSeriesTicks(interval, date);
+                            } else {
+                                return tick
+                            }
                             
-                            return formatTimeSeriesTicks(interval, date);
                         }
+                    }
+                }
+            }
+            switch (child.type.displayName) {
+                //handle multiple axis
+                case "YAxis":
+                    return React.cloneElement(child, { 
+                        allowDataOverflow: true, 
+                        domain: yAxisDomain,
+                        scale: 'linear'
                     })
+                case "XAxis":
+                    return React.cloneElement(child, xAxisConfig(child))
                 case "Line": 
+                    return React.cloneElement(child, { 
+                        //TODO disable dots when moving cause its causing performance issues when there are lots of them
+                        // dot: (prevXAxisDomain != xAxisDomain || prevYAxisDomain != yAxisDomain) ? null : true
+                    })
+                case "Area": 
                     return React.cloneElement(child, { 
                         //TODO disable dots when moving cause its causing performance issues when there are lots of them
                         // dot: (prevXAxisDomain != xAxisDomain || prevYAxisDomain != yAxisDomain) ? null : true
@@ -192,16 +222,20 @@ export const Toolkit = (props: ToolkitProps) => {
                 })
             }
 
-            {parent &&
-                React.cloneElement(
-                    parent, 
-                    {
-                        id: toolkit_graph_ref.current
-                    }, 
-                    children()
-                )
+            {
+                parent &&
+                    React.cloneElement(
+                        parent, 
+                        {
+                            id: toolkit_graph_ref.current,
+                            width: props.width || parent.props.width,
+                            height: props.height  || parent.props.height
+                            
+                        }, 
+                        children()
+                    )
             }
-
+          
             {/* is this really slower than adding it to customized? */}
             {/* drag layer */}
             {(graphStatetRef.current && hasSet) && 
@@ -259,4 +293,4 @@ export const Toolkit = (props: ToolkitProps) => {
             {tooltipCoord &&  <CustomTooltip {...{tooltipMode, tooltipCoord}}/> }
         </div>
     );
-};
+});

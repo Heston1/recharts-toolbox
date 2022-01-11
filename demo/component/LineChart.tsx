@@ -1,10 +1,47 @@
 import React, { Component } from 'react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { ResponsiveContainer, LineChart, ComposedChart , 
+  Area, Line, Legend, XAxis, YAxis, CartesianGrid, ReferenceLine,
+    Label, LabelList, Brush } from 'recharts';
 import { Toolkit, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, 
   ToolBar, TooltipClosest, TooltipCompare, BoxSelect, LasoSelect,
    DrawTool, Export, ReferenceLines, Ruler } from 'recharts-toolkit';
 import { changeNumberOfData } from './utils';
 import * as _ from 'lodash';
+
+const data = [
+  { name: 'Page A', uv: 1000, pv: 2400, amt: 2400, uvError: [75, 20] },
+  { name: 'Page B', uv: 300, pv: 4567, amt: 2400, uvError: [90, 40] },
+  { name: 'Page C', uv: 280, pv: 1398, amt: 2400, uvError: 40 },
+  { name: 'Page D', uv: 200, pv: 9800, amt: 2400, uvError: 20 },
+  { name: 'Page E', uv: 278, pv: null, amt: 2400, uvError: 28 },
+  { name: 'Page F', uv: 189, pv: 4800, amt: 2400, uvError: [90, 20] },
+  { name: 'Page G', uv: 189, pv: 4800, amt: 2400, uvError: [28, 40] },
+  { name: 'Page H', uv: 189, pv: 4800, amt: 2400, uvError: 28 },
+  { name: 'Page I', uv: 189, pv: 4800, amt: 2400, uvError: 28 },
+  { name: 'Page J', uv: 189, pv: 4800, amt: 2400, uvError: [15, 60] },
+];
+
+const data01 = [
+  { day: '05-01', weather: 'sunny' },
+  { day: '05-02', weather: 'sunny' },
+  { day: '05-03', weather: 'cloudy' },
+  { day: '05-04', weather: 'rain' },
+  { day: '05-05', weather: 'rain' },
+  { day: '05-06', weather: 'cloudy' },
+  { day: '05-07', weather: 'cloudy' },
+  { day: '05-08', weather: 'sunny' },
+  { day: '05-09', weather: 'sunny' },
+];
+
+const data02 = [
+  { name: 'Page A', uv: 300, pv: 2600, amt: 3400 },
+  { name: 'Page B', uv: 400, pv: 4367, amt: 6400 },
+  { name: 'Page C', uv: 300, pv: 1398, amt: 2400 },
+  { name: 'Page D', uv: 200, pv: 9800, amt: 2400 },
+  { name: 'Page E', uv: 278, pv: 3908, amt: 2400 },
+  { name: 'Page F', uv: 189, pv: 4800, amt: 2400 },
+  { name: 'Page G', uv: 189, pv: 4800, amt: 2400 },
+];
 
 const data03 = [
   { date: 'Jan 04 2016', price: 105.35 },
@@ -259,17 +296,22 @@ const data03 = [
   { date: 'Dec 28 2016', price: 116.76 },
   { date: 'Dec 29 2016', price: 116.73 },
   { date: 'Dec 30 2016', price: 115.82 },
+
+  // { date: 'Jan 01 2017',},TODO handle null y axis value
 ];
 
 const initialState = {
+  data03,
+  data01,
+  data02,
   opacity: 1,
   anotherState: false,
   data: data03,
-  date: 0,
+  date: 1,
   price: 115.82,
   isrealtime: false
 };
-let realTimeSim: any;
+let realTimeSim: any, LASTMA: number;
 export default class Demo extends Component<any, any> {
 
   static displayName = 'LineChartDemo';
@@ -288,7 +330,7 @@ export default class Demo extends Component<any, any> {
 
   render() {
     return (
-      <div className="line-charts">
+      <div className="line-charts"  style={{margin: '0 25%'}}>
 
         <div className="line-chart-wrapper">
           <button onClick={e => {
@@ -338,29 +380,130 @@ export default class Demo extends Component<any, any> {
               <Ruler />
             </ToolBar>
 
-            <LineChart
-              width={600} height={400} data={
-                this.state.data
-                  .map((point: any) => (
-                    {
-                      date: new Date(point.date).getTime()/1000, 
-                      price: point.price,
-                      target: 250-point.price*Math.log(5),
-                    }
-                  ))
-              }
-              margin={{ top: 40, right: 40, bottom: 20, left: 20 }}
-            >
-                <CartesianGrid vertical={true} />
-                <XAxis dataKey="date" label="Date" />
-                <YAxis  label="Stock Price"/>
-                <Line dataKey="price" stroke="#ff7300" dot={false} />
-                <Line dataKey="target" stroke="green" dot={false} />
-            </LineChart>
+            <ResponsiveContainer height={400}>
+              <ComposedChart 
+                 data={
+                  this.state.data
+                    .map((point: any, index: number) => {
+                      
+                      let EXPMA: number;
+                      let u2: number;
+                      let ma: number;
+                      const d = this.state.data;
+                      const period = 19; 
+                      const P = period+1; //last 20 points
+                      const multiplier = 2/(P+1); //weighting multiplier n+1
+
+                      if (index == period) {
+                        //sum of period
+                        const sum = d.filter((x:any,i:number) => i<20).reduce((acc:number, x:any) => acc+x.price, 0);
+
+                        //exp moving average
+                        EXPMA = (d[index-1].price-sum/P)*multiplier+sum/P;
+                        LASTMA = EXPMA;
+                        ma = sum/P
+                      }
+
+                      if (index > period) {
+                        //exp moving average
+                        EXPMA = (d[index-1].price-LASTMA)*multiplier+LASTMA;
+                        LASTMA = EXPMA;
+                        //sum of period
+                        const sum = d.filter((x:any,i:number) => i>=index-20 && i < index)
+                            .reduce((acc:number, x:any) => acc+x.price, 0);
+                        //mean
+                        const u = sum/P
+                        ma = u
+                        //variance
+                        u2 = d.filter((p:any,i:number) => i>=index-20 && i < index)
+                            .map((x:any) => (x.price-u)**2)
+                            .reduce((acc:number, p: number) =>acc+p,0)/P
+                      }  
+                      
+                      return {
+                        date: new Date(point.date).getTime()/1000, 
+                        price: point.price,
+                        middleband: EXPMA, //median band
+                        ma,
+                        bollinger: [
+                          EXPMA && EXPMA + (Math.sqrt(u2)*2), //upper band
+                          EXPMA && EXPMA - (Math.sqrt(u2)*2) //lower band
+                        ]
+                      }
+                    })
+                }
+                margin={{ top: 40, right: 40, bottom: 20, left: 20 }}
+              >
+                  <CartesianGrid verticalFill={["#ffffff", "#efefef"]} vertical={true} horizontal={true} />
+                  <XAxis dataKey="date" label="Date" type="time" />
+                  <YAxis  label="Stock Price" />
+                  <Legend iconType="plainline" align="left" verticalAlign="top" margin={{ top: 0, left: 200, right: 0, bottom: 0 }}/>
+                  <YAxis  label="test" orientation="right"/>
+                  <Line name="close" dataKey="price" stroke="#0f69ff" dot={false} connectNulls isAnimationActive={false} animationDuration={0} />
+                  <Line name="moving avg." dataKey="ma" stroke="#7e1fff" dot={false} isAnimationActive={false} animationDuration={0}/>
+                  <Line name="exp. moving avg." dataKey="middleband" stroke="orange" dot={false} connectNulls isAnimationActive={false} animationDuration={0}/>
+                  <Area name="exp. bollinger bands" dataKey="bollinger" stroke="orange" strokeWidth={1} connectNulls  fill="orange" fillOpacity={0.1} isAnimationActive={false} animationDuration={0}/>
+              </ComposedChart>
+            </ResponsiveContainer>
           </Toolkit>
         </div>
 
-      </div>
+        <p>A simple LineChart with fixed domain y-axis</p>
+        <div className="line-chart-wrapper">
+          <Toolkit>
+
+            <ToolBar 
+              displayMode={'visible'}
+            >
+              <Camera/>
+
+              <ZoomSelect />
+              <ZoomIn />
+              <ZoomOut />
+              <Pan />
+              <AutoScale />
+              <Reset />
+              <TooltipClosest />
+              <TooltipCompare />
+              <BoxSelect onSelected={(points: any) => console.log(points)}/>
+              <LasoSelect onSelected={(points: any) => console.log(points)}/>
+              <ReferenceLines />
+              <Export />
+              <DrawTool />
+              <Ruler />
+            </ToolBar>
+            {/* <ResponsiveContainer height={400}> */}
+            <LineChart width={600} height={400} data={data02} syncId="test">
+              <CartesianGrid stroke="#f5f5f5" fill="#e6e6e6" />
+              <Legend
+                // onMouseEnter={this.handleLegendMouseEnter}
+                // onMouseLeave={this.handleLegendMouseLeave}
+              />
+              <XAxis type="number" dataKey="pv" height={40}>
+                <Label value="x轴" position="insideBottom" />
+              </XAxis>
+              <YAxis type="number" unit="%" width={80}>
+                <Label value="y轴" position="insideLeft" angle={90} />
+              </YAxis>
+              {/* <Tooltip trigger="click" /> */}
+              <Line
+                key="uv"
+                type="monotone"
+                dataKey="uv"
+                stroke="#ff7300"
+                // dot={renderSpecialDot}
+                // strokeOpacity={opacity}
+                strokeDasharray="3 3"
+              >
+                <LabelList position="bottom" offset={10} dataKey="name" />
+              </Line>
+              <Brush dataKey="name" height={30} />
+            </LineChart>
+            {/* </ResponsiveContainer> */}
+          </Toolkit>
+        </div>
+
+      </div>  
     );
   }
 }

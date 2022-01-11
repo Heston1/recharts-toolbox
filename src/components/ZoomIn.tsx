@@ -3,7 +3,7 @@ import { calculateTimeSeriesTicks, resolveAxis } from '../utils/helpers';
 
 export const ZoomIn = (props: any) => {
     const {yAxisDomain, setYAxisDomain, setXAxisDomain, xAxisDomain, setTicks} = props;
-    
+
     const zoomFunction = (e: any) => {
         const yDomain = resolveAxis(props, yAxisDomain);
         const xDomain = resolveAxis(props, xAxisDomain);
@@ -19,7 +19,8 @@ export const ZoomIn = (props: any) => {
         setYAxisDomain([y1, y2])
         const x1 = xDomain[0] + scalex;
         const x2 = xDomain[1] - scalex;
-        setXAxisDomain([x1, x2])
+
+        setXAxisDomain([x1, x2]);
         calculateTimeSeriesTicks(5, xAxisDomain, [x1, x2], setTicks);
     };
 
