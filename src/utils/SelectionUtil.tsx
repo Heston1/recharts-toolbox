@@ -1,10 +1,8 @@
 import React from 'react';
 import { resolveAxis, isInPolygon } from './helpers';
-// import usePrevious from './usePrevious';
-import {scaleLinear} from 'd3-scale';
+import { scaleLinear } from 'd3-scale';
 
 let select_wasMoved = false, maskInterval: any
-// , ymap:any = [], xmap:any = [];
 const SelectionUtil = (selectionProps: any)  => {
     //TODO handle padding/margin, other offsets
     const props = selectionProps.graphProps;
@@ -16,10 +14,6 @@ const SelectionUtil = (selectionProps: any)  => {
     
     const [vYmap, setVYMAP] = React.useState([]);
     const [vXmap, setVXMAP] = React.useState([]);
-    // const [drawStartPointX, setDrawStartPointX] = React.useState([0,0])
-    // const [drawStartPointY, setDrawStartPointY] = React.useState([0,0])
-    // const previousXDomain = usePrevious(selectionProps.xAxisDomain);
-    // const previousYDomain = usePrevious(selectionProps.yAxisDomain);
 
     React.useEffect(() => {
         if (maskOpacity > 0.3) {
@@ -152,15 +146,8 @@ const SelectionUtil = (selectionProps: any)  => {
 
         const bbox = e.target.getBoundingClientRect();
         const x = e.clientX - selectionProps.offsetLeft, y = e.clientY - bbox.top + props.yAxisMap[0].y
+        
         // TODO M if new position, maybe 2d array
-        // setVXMAP(vXmap.concat([x]))
-        // setVYMAP(vYmap.concat([y]))
-
-        //TODO remove
-        // setDrawStartPointX(selectionProps.xAxisDomain)
-        // setDrawStartPointY(selectionProps.yAxisDomain)
-
-        //get the domain xy coords
         mousetocoord(x,y);
     }
     const onDrawMove = (e: any) => {
@@ -168,66 +155,13 @@ const SelectionUtil = (selectionProps: any)  => {
             const bbox = e.target.getBoundingClientRect();
             const x = e.clientX - selectionProps.offsetLeft, y = e.clientY - bbox.top + props.yAxisMap[0].y
 
-            // setVXMAP(vXmap.concat([x]))
-            // setVYMAP(vYmap.concat([y]))
-
             mousetocoord(x,y);
         }
     }
     const onDrawUp = (e: any) => {
         select_wasMoved = false;
-
-        //TODO yuck
-        // ymap = vYmap;
-        // xmap = vXmap;
     }
 
-    // React.useEffect(() => {
-    //     const [yA1, yA2] = resolveAxis(props, selectionProps.yAxisDomain);
-    //     const [xA1, xA2] = resolveAxis(props, selectionProps.xAxisDomain);
-    //     const [syA1, syA2] = resolveAxis(props, drawStartPointY);
-    //     const [sxA1, sxA2] = resolveAxis(props, drawStartPointX);
-    //     //get the offset percent from the drawpoint start
-
-    //     const scalex = (sxA2-sxA1)/(xA2-xA1)
-    //     const scaley = (syA2-syA1)/(yA2-yA1)
-    //     const dx = ((xA1-sxA1)/(xA2-xA1));
-    //     const dy = (yA1-syA1)/(syA2-syA1);
-        
-
-    //     let newx:any = [], newy:any = [];
-    //     xmap.map((x: number, index: number) => {
-    //         const y = ymap[index];
-
-    //         //TODO  
-    //         //origin and xaxis end scale is inversed, 
-    //         //doesn't adjust based on scale, and always offsets from origin
-    //         if (previousXDomain && previousXDomain[0] == xA1) {
-    //             newx[index] = (((x*scalex)) - (((x*dx-(x*(1-scalex))))/(x/props.xAxisMap[0].x)));
-    //         } else if (previousXDomain && previousXDomain[1] == xA2) {
-    //             newx[index] = (((x*scalex)) - (((x*dx))/(x/(props.xAxisMap[0].x+props.xAxisMap[0].width))));
-    //         } else {
-    //             newx[index] = ((x*scalex)) - ((x*dx)/(x/props.xAxisMap[0].width))
-    //         }
-
-    //         if (previousYDomain && previousYDomain[0] == yA1) {
-    //             newy[index] = (((y*scaley)) - (((y*dy-(y*(1-scaley))))/(y/(props.yAxisMap[0].y+props.yAxisMap[0].height)))) 
-    //         } else if (previousYDomain && previousYDomain[1] == yA2) {
-    //             newy[index] = (((y*scaley)) - (((y*dy))/props.yAxisMap[0].y))
-    //         } else {
-    //             newy[index] = ((y*scaley)) - ((y*dy)/(y/props.yAxisMap[0].height)) *-1
-    //         }
-            
-    //     })
-    //     setVYMAP(newy)
-    //     setVXMAP(newx)
-        
-
-    // }, [selectionProps.xAxisDomain, selectionProps.yAxisDomain,])
-
-
-    // const scale = scaleLinear().domain([xA1, xA2]).range([0, props.xAxisMap[0].width])
-            
     //TODO multiple selections
     if (selectionProps.mode == "laso") {
         return (
