@@ -7,7 +7,7 @@ import SelectionUtil from './utils/SelectionUtil';
 import TooltipUtil from './utils/TooltipUtil';
 // import usePrevious from './utils/usePrevious';
 import { withFading } from './utils/withFading';
-import { withResponsiveContainer } from './withResponsiveContainer';
+import { withResponsiveContainer } from './utils/withResponsiveContainer';
 
 export interface ToolkitProps {
     children: JSX.Element | JSX.Element[] | string;
@@ -145,29 +145,34 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                     }
                 }
             }
-            switch (child.type.displayName) {
-                //handle multiple axis
-                case "YAxis":
-                    return React.cloneElement(child, { 
-                        allowDataOverflow: true, 
-                        domain: yAxisDomain,
-                        scale: 'linear'
-                    })
-                case "XAxis":
-                    return React.cloneElement(child, xAxisConfig(child))
-                case "Line": 
-                    return React.cloneElement(child, { 
-                        //TODO disable dots when moving cause its causing performance issues when there are lots of them
-                        // dot: (prevXAxisDomain != xAxisDomain || prevYAxisDomain != yAxisDomain) ? null : true
-                    })
-                case "Area": 
-                    return React.cloneElement(child, { 
-                        //TODO disable dots when moving cause its causing performance issues when there are lots of them
-                        // dot: (prevXAxisDomain != xAxisDomain || prevYAxisDomain != yAxisDomain) ? null : true
-                    })
-                default:
-                    return React.cloneElement(child)
-            };
+            if (child.type) {
+                switch (child.type.displayName) {
+                    //handle multiple axis
+                    case "YAxis":
+                        return React.cloneElement(child, { 
+                            allowDataOverflow: true, 
+                            domain: yAxisDomain,
+                            scale: 'linear'
+                        })
+                    case "XAxis":
+                        return React.cloneElement(child, xAxisConfig(child))
+                    case "Line": 
+                        return React.cloneElement(child, { 
+                            //TODO disable dots when moving cause its causing performance issues when there are lots of them
+                            // dot: (prevXAxisDomain != xAxisDomain || prevYAxisDomain != yAxisDomain) ? null : true
+                        })
+                    case "Area": 
+                        return React.cloneElement(child, { 
+                            //TODO disable dots when moving cause its causing performance issues when there are lots of them
+                            // dot: (prevXAxisDomain != xAxisDomain || prevYAxisDomain != yAxisDomain) ? null : true
+                        })
+                    default:
+                        return React.cloneElement(child)
+                };
+            } else {
+                return React.cloneElement(child)
+            }
+            
         }
     );
 

@@ -1,16 +1,25 @@
 import React from 'react';
 import { resolveAxis, isInPolygon } from './helpers';
+// import usePrevious from './usePrevious';
+import {scaleLinear} from 'd3-scale';
 
-let select_wasMoved = false, maskInterval: any;
+let select_wasMoved = false, maskInterval: any
+// , ymap:any = [], xmap:any = [];
 const SelectionUtil = (selectionProps: any)  => {
     //TODO handle padding/margin, other offsets
     const props = selectionProps.graphProps;
     const [start, setStart] = React.useState(null);
     const [end, setEnd] = React.useState(null);
     const [path, setPath] = React.useState("");
-    const [vYmap, setVYMAP] = React.useState([])
-    const [vXmap, setVXMAP] = React.useState([])
+    
     const [maskOpacity, setMaskOpacity] = React.useState(0);
+    
+    const [vYmap, setVYMAP] = React.useState([]);
+    const [vXmap, setVXMAP] = React.useState([]);
+    // const [drawStartPointX, setDrawStartPointX] = React.useState([0,0])
+    // const [drawStartPointY, setDrawStartPointY] = React.useState([0,0])
+    // const previousXDomain = usePrevious(selectionProps.xAxisDomain);
+    // const previousYDomain = usePrevious(selectionProps.yAxisDomain);
 
     React.useEffect(() => {
         if (maskOpacity > 0.3) {
@@ -25,6 +34,7 @@ const SelectionUtil = (selectionProps: any)  => {
         const bbox = e.target.getBoundingClientRect();
         
         setStart({x: e.clientX - selectionProps.offsetLeft, y: e.clientY - bbox.top + props.yAxisMap[0].y}); 
+        //TODO replace with <style />
         maskInterval = setInterval(() => {
             setMaskOpacity(prev => prev+0.01);
         }, 2);
@@ -125,6 +135,99 @@ const SelectionUtil = (selectionProps: any)  => {
         });
     }
 
+    const mousetocoord = (x: number, y: number) => {
+        const [yA1, yA2] = resolveAxis(props, selectionProps.yAxisDomain);
+        const [xA1, xA2] = resolveAxis(props, selectionProps.xAxisDomain);
+        const xcoord = (xA1 - ( (xA1 - xA2) * (x - props.xAxisMap[0].x)/(props.xAxisMap[0].width) ) );
+        const ycoord = (yA2 - ( (yA2 - yA1) * (y - props.yAxisMap[0].y)/(props.yAxisMap[0].height) ) );
+        setVXMAP(vXmap.concat([xcoord]));
+        setVYMAP(vYmap.concat([ycoord]));
+    }
+
+    const onDrawDown = (e: any) => {
+        select_wasMoved = true;
+        setPath("");
+        setVYMAP([]);
+        setVXMAP([]);
+
+        const bbox = e.target.getBoundingClientRect();
+        const x = e.clientX - selectionProps.offsetLeft, y = e.clientY - bbox.top + props.yAxisMap[0].y
+        // TODO M if new position, maybe 2d array
+        // setVXMAP(vXmap.concat([x]))
+        // setVYMAP(vYmap.concat([y]))
+
+        //TODO remove
+        // setDrawStartPointX(selectionProps.xAxisDomain)
+        // setDrawStartPointY(selectionProps.yAxisDomain)
+
+        //get the domain xy coords
+        mousetocoord(x,y);
+    }
+    const onDrawMove = (e: any) => {
+        if (select_wasMoved) {
+            const bbox = e.target.getBoundingClientRect();
+            const x = e.clientX - selectionProps.offsetLeft, y = e.clientY - bbox.top + props.yAxisMap[0].y
+
+            // setVXMAP(vXmap.concat([x]))
+            // setVYMAP(vYmap.concat([y]))
+
+            mousetocoord(x,y);
+        }
+    }
+    const onDrawUp = (e: any) => {
+        select_wasMoved = false;
+
+        //TODO yuck
+        // ymap = vYmap;
+        // xmap = vXmap;
+    }
+
+    // React.useEffect(() => {
+    //     const [yA1, yA2] = resolveAxis(props, selectionProps.yAxisDomain);
+    //     const [xA1, xA2] = resolveAxis(props, selectionProps.xAxisDomain);
+    //     const [syA1, syA2] = resolveAxis(props, drawStartPointY);
+    //     const [sxA1, sxA2] = resolveAxis(props, drawStartPointX);
+    //     //get the offset percent from the drawpoint start
+
+    //     const scalex = (sxA2-sxA1)/(xA2-xA1)
+    //     const scaley = (syA2-syA1)/(yA2-yA1)
+    //     const dx = ((xA1-sxA1)/(xA2-xA1));
+    //     const dy = (yA1-syA1)/(syA2-syA1);
+        
+
+    //     let newx:any = [], newy:any = [];
+    //     xmap.map((x: number, index: number) => {
+    //         const y = ymap[index];
+
+    //         //TODO  
+    //         //origin and xaxis end scale is inversed, 
+    //         //doesn't adjust based on scale, and always offsets from origin
+    //         if (previousXDomain && previousXDomain[0] == xA1) {
+    //             newx[index] = (((x*scalex)) - (((x*dx-(x*(1-scalex))))/(x/props.xAxisMap[0].x)));
+    //         } else if (previousXDomain && previousXDomain[1] == xA2) {
+    //             newx[index] = (((x*scalex)) - (((x*dx))/(x/(props.xAxisMap[0].x+props.xAxisMap[0].width))));
+    //         } else {
+    //             newx[index] = ((x*scalex)) - ((x*dx)/(x/props.xAxisMap[0].width))
+    //         }
+
+    //         if (previousYDomain && previousYDomain[0] == yA1) {
+    //             newy[index] = (((y*scaley)) - (((y*dy-(y*(1-scaley))))/(y/(props.yAxisMap[0].y+props.yAxisMap[0].height)))) 
+    //         } else if (previousYDomain && previousYDomain[1] == yA2) {
+    //             newy[index] = (((y*scaley)) - (((y*dy))/props.yAxisMap[0].y))
+    //         } else {
+    //             newy[index] = ((y*scaley)) - ((y*dy)/(y/props.yAxisMap[0].height)) *-1
+    //         }
+            
+    //     })
+    //     setVYMAP(newy)
+    //     setVXMAP(newx)
+        
+
+    // }, [selectionProps.xAxisDomain, selectionProps.yAxisDomain,])
+
+
+    // const scale = scaleLinear().domain([xA1, xA2]).range([0, props.xAxisMap[0].width])
+            
     //TODO multiple selections
     if (selectionProps.mode == "laso") {
         return (
@@ -189,11 +292,52 @@ const SelectionUtil = (selectionProps: any)  => {
                     style={{opacity: 0, cursor: 'crosshair'}}
                 />
             </g>
-        )
+        );
     }
 
     if (selectionProps.mode == "draw") {
-        //TODO
+        return (
+            <g>
+                <path
+                    d={vXmap.reduce((acc: string, x: number, index: number) => {
+                        const [yA1, yA2] = resolveAxis(props, selectionProps.yAxisDomain);
+                        const [xA1, xA2] = resolveAxis(props, selectionProps.xAxisDomain);
+
+                        const scalex = scaleLinear()
+                            .domain([xA1, xA2])
+                            .range([0, props.xAxisMap[0].width]);
+                        const scaley = scaleLinear() 
+                            .domain([yA1, yA2])
+                            .range([props.yAxisMap[0].height, 0]);
+                        const xPos = scalex(x) + props.yAxisMap[0].width + props.yAxisMap[0].x
+                        const yPos = scaley(vYmap[index]) + props.yAxisMap[0].y 
+                        if (index == 0) {
+                            return  `M${xPos},${yPos}`
+                        } else if (index > 0) {
+                            return  acc + `L${xPos},${yPos}`
+                        } else {
+                            //Z
+                        }
+                        
+                    }, "")}
+                    style={{
+                        stroke: "red", 
+                        strokeWidth: 1,
+                        fillOpacity: 0,
+                    }}
+                />
+                <rect 
+                    onMouseDown={onDrawDown}
+                    onMouseMove={onDrawMove}
+                    onMouseUp={onDrawUp}
+                    x={props.yAxisMap[0].width + props.yAxisMap[0].x} 
+                    y={props.yAxisMap[0].y} 
+                    width={props.xAxisMap[0].width} 
+                    height={props.yAxisMap[0].height} 
+                    style={{opacity: 0, cursor: 'crosshair'}}
+                />
+            </g>
+        )
     }
 
     if (selectionProps.mode == "ruler") {

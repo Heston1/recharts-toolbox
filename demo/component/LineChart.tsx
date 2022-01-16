@@ -1,12 +1,47 @@
 import React, { Component } from 'react';
 import { ResponsiveContainer, LineChart, ComposedChart , 
   Area, Line, Legend, XAxis, YAxis, CartesianGrid, ReferenceLine,
-    Label, LabelList, Brush } from 'recharts';
+    Label, LabelList, Brush, ScatterChart, ZAxis, Scatter, Polygon, Rectangle, Customized } from 'recharts';
 import { Toolkit, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, 
   ToolBar, TooltipClosest, TooltipCompare, BoxSelect, LasoSelect,
    DrawTool, Export, ReferenceLines, Ruler } from 'recharts-toolkit';
 import { changeNumberOfData } from './utils';
 import * as _ from 'lodash';
+
+
+const scatter01 = [
+  { x: 100, y: 200, z: 200, errorY: [20, 30], errorX: 30 },
+  { x: 120, y: 100, z: 260, errorY: 20, errorX: [20, 30] },
+  { x: 170, y: 300, z: 400, errorY: [12, 8], errorX: 20 },
+  { x: 140, y: 250, z: 280, errorY: 23, errorX: [12, 8] },
+  { x: 150, y: 400, z: 500, errorY: [21, 10], errorX: 23 },
+  { x: 110, y: 280, z: 200, errorY: 21, errorX: [21, 10] },
+];
+
+const scatter02 = [
+  { x: 200, y: 260, z: 240 },
+  { x: 240, y: 290, z: 220 },
+  { x: 190, y: 290, z: 250 },
+  { x: 198, y: 250, z: 210 },
+  { x: 180, y: 280, z: 260 },
+  { x: 210, y: 220, z: 230 },
+];
+
+const randdist = Array.from(Array(100).keys()).map((x: number) => {
+  const rand = (min: number, max: number) =>  parseFloat((Math.random() * ((max) - (min) + 1) + (min)).toFixed(2));
+    return {
+      x,
+      y: rand(x-rand(0,50), x+rand(0,50))
+    }
+});
+
+const randdist2 = Array.from(Array(100).keys()).map((x: number) => {
+  const rand = (min: number, max: number) =>  parseFloat((Math.random() * ((max) - (min) + 1) + (min)).toFixed(2));
+    return {
+      x: x+rand(0,50),
+      y: rand(x-rand(0,50), x+rand(0,50))
+    }
+});
 
 const data = [
   { name: 'Page A', uv: 1000, pv: 2400, amt: 2400, uvError: [75, 20] },
@@ -434,16 +469,26 @@ export default class Demo extends Component<any, any> {
                 }
                 margin={{ top: 40, right: 40, bottom: 20, left: 20 }}
               >
-                  <CartesianGrid verticalFill={["#ffffff", "#efefef"]} vertical={true} horizontal={true} />
-                  <XAxis dataKey="date" label="Date" type="time" />
-                  <YAxis  label="Stock Price" />
+                  <CartesianGrid verticalFill={["#ffffff", "#efefef"]} vertical={true} horizontal={true} > 
+                    <Rectangle x={0} y={0} width={100} height={100}></Rectangle>
+                  </CartesianGrid>
+                  {/* TODO override types? */}
+                  {/*  @ts-ignore */}
+                  <XAxis dataKey="date" type="time">
+                    <Label value="Date" position="insideBottom" />
+                  </XAxis>
+                  <YAxis >
+                    <Label value="Stock Price" position="insideLeft" angle={90} />
+                  </YAxis>
                   <Legend iconType="plainline" align="left" verticalAlign="top" margin={{ top: 0, left: 200, right: 0, bottom: 0 }}/>
                   <YAxis  label="test" orientation="right"/>
-                  <Line name="close" dataKey="price" stroke="#0f69ff" dot={false} connectNulls isAnimationActive={false} animationDuration={0} />
-                  <Line name="moving avg." dataKey="ma" stroke="#7e1fff" dot={false} isAnimationActive={false} animationDuration={0}/>
-                  <Line name="exp. moving avg." dataKey="middleband" stroke="orange" dot={false} connectNulls isAnimationActive={false} animationDuration={0}/>
-                  <Area name="exp. bollinger bands" dataKey="bollinger" stroke="orange" strokeWidth={1} connectNulls  fill="orange" fillOpacity={0.1} isAnimationActive={false} animationDuration={0}/>
-              </ComposedChart>
+                  <Line name="CLOSE" dataKey="price" stroke="#0f69ff" dot={false} connectNulls isAnimationActive={false} animationDuration={0} />
+                  {/* period, field, type, offset */}
+                  <Line name="MA (20, C, MA, 0)" dataKey="ma" stroke="#7e1fff" dot={false} isAnimationActive={false} animationDuration={0}/>
+                  <Line name="MA (20, C, EMA, 0)" dataKey="middleband" stroke="orange" dot={false} connectNulls isAnimationActive={false} animationDuration={0}/>
+                  {/* period, field, standard deviations, type */}
+                  <Area name="BOLLINGER BANDS (20, C, 2, EMA)" dataKey="bollinger" stroke="orange" strokeWidth={1} connectNulls  fill="orange" fillOpacity={0.1} isAnimationActive={false} animationDuration={0}/>
+                </ComposedChart>
             </ResponsiveContainer>
           </Toolkit>
         </div>
@@ -480,10 +525,10 @@ export default class Demo extends Component<any, any> {
                 // onMouseLeave={this.handleLegendMouseLeave}
               />
               <XAxis type="number" dataKey="pv" height={40}>
-                <Label value="x轴" position="insideBottom" />
+                <Label value="x" position="insideBottom" />
               </XAxis>
               <YAxis type="number" unit="%" width={80}>
-                <Label value="y轴" position="insideLeft" angle={90} />
+                <Label value="y" position="insideLeft" angle={90} />
               </YAxis>
               {/* <Tooltip trigger="click" /> */}
               <Line
@@ -497,12 +542,58 @@ export default class Demo extends Component<any, any> {
               >
                 <LabelList position="bottom" offset={10} dataKey="name" />
               </Line>
-              <Brush dataKey="name" height={30} />
+              {/* <Brush dataKey="name" height={30} /> TODO handle brush*/}
             </LineChart>
+            
             {/* </ResponsiveContainer> */}
           </Toolkit>
         </div>
+              
+        <div className="line-chart-wrapper">
+          {/* <Toolkit> */}
 
+            {/* <ToolBar 
+              displayMode={'visible'}
+            >
+              <Camera/>
+
+              <ZoomSelect />
+              <ZoomIn />
+              <ZoomOut />
+              <Pan />
+              <AutoScale />
+              <Reset />
+              <TooltipClosest />
+              <TooltipCompare />
+              <BoxSelect onSelected={(points: any) => console.log(points)}/>
+              <LasoSelect onSelected={(points: any) => console.log(points)}/>
+              <ReferenceLines />
+              <Export />
+              <DrawTool />
+              <Ruler />
+            </ToolBar> */}
+            <ScatterChart width={400} height={400} margin={{ top: 20, right: 20, bottom: 0, left: 20 }}>
+                <XAxis type="number" dataKey="x" name="stature" unit="cm" />
+                <YAxis type="number" dataKey="y" name="weight" unit="kg" />
+                {/* <ZAxis type="number" dataKey="z" range={[50, 1200]} name="score" unit="km" /> */}
+                <CartesianGrid />
+                <Scatter 
+                  name="A school" 
+                  data={randdist} 
+                  type="number"
+                  fillOpacity={0.3} fill="#ff7300" 
+                />
+                <Scatter name="B school" data={randdist2} fill="#347300" />
+                {/* <Tooltip trigger="click" /> */}
+                <Legend/>
+                {/* <ReferenceArea x1={250} x2={300} alwaysShow label="any label" /> */}
+                {/* <ReferenceLine x={159} stroke="red"/>
+                <ReferenceLine y={237.5} stroke="red"/>
+                <ReferenceDot x={170} y={290} r={15} label="AB" stroke="none" fill="red" isFront/> */}
+            </ScatterChart>
+          {/* </Toolkit> */}
+
+        </div>
       </div>  
     );
   }
