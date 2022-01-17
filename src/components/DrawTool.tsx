@@ -12,6 +12,10 @@ export const DrawTool  = (props: any) => {
         }
     }, [selectCoords])
 
+    React.useEffect(() => {
+        props.setDrawType(props.type)
+    }, [props.type])
+
     //TODO change icon
     return (
         <svg onClick={(e: any) => {setSelectState('draw')}} xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="rgb(102, 102, 102)" viewBox="0 0 16 16">

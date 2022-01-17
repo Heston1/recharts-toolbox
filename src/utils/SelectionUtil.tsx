@@ -1,5 +1,5 @@
 import React from 'react';
-import { resolveAxis, isInPolygon } from './helpers';
+import { resolveAxis, isInPolygon, uid } from './helpers';
 import { scaleLinear } from 'd3-scale';
 
 let select_wasMoved = false, maskInterval: any
@@ -9,7 +9,8 @@ const SelectionUtil = (selectionProps: any)  => {
     const [start, setStart] = React.useState(null);
     const [end, setEnd] = React.useState(null);
     const [path, setPath] = React.useState("");
-    
+    const [canvasItems, setCanvasItems] = React.useState({});
+    const [drawContext, setDrawContext] = React.useState(null);
     const [maskOpacity, setMaskOpacity] = React.useState(0);
     
     const [vYmap, setVYMAP] = React.useState([]);
@@ -134,32 +135,69 @@ const SelectionUtil = (selectionProps: any)  => {
         const [xA1, xA2] = resolveAxis(props, selectionProps.xAxisDomain);
         const xcoord = (xA1 - ( (xA1 - xA2) * (x - props.xAxisMap[0].x)/(props.xAxisMap[0].width) ) );
         const ycoord = (yA2 - ( (yA2 - yA1) * (y - props.yAxisMap[0].y)/(props.yAxisMap[0].height) ) );
-        setVXMAP(vXmap.concat([xcoord]));
-        setVYMAP(vYmap.concat([ycoord]));
+
+        return {
+            x: xcoord,
+            y: ycoord
+        }
     }
 
     const onDrawDown = (e: any) => {
         select_wasMoved = true;
-        setPath("");
-        setVYMAP([]);
-        setVXMAP([]);
 
         const bbox = e.target.getBoundingClientRect();
         const x = e.clientX - selectionProps.offsetLeft, y = e.clientY - bbox.top + props.yAxisMap[0].y
-        
-        // TODO M if new position, maybe 2d array
-        mousetocoord(x,y);
+    
+        const id = uid();
+        const items: any = canvasItems;
+        const newItem = {
+            type: 'line',
+            id,
+            points: [
+                mousetocoord(x,y)
+            ]
+        };
+        items[id] = newItem;
+        setCanvasItems(items);
+        setDrawContext(id);
     }
     const onDrawMove = (e: any) => {
         if (select_wasMoved) {
-            const bbox = e.target.getBoundingClientRect();
-            const x = e.clientX - selectionProps.offsetLeft, y = e.clientY - bbox.top + props.yAxisMap[0].y
+            if (selectionProps.drawType == 'polygon') {
+                const bbox = e.target.getBoundingClientRect();
+                const x = e.clientX - selectionProps.offsetLeft, y = e.clientY - bbox.top + props.yAxisMap[0].y
 
-            mousetocoord(x,y);
+                const items: any = canvasItems;
+                
+                const item = canvasItems[drawContext];
+                
+                const newPoints = item.points.concat([mousetocoord(x,y)]);
+
+                item.points = newPoints;
+
+                items[drawContext] = item;
+
+                setCanvasItems({...items})
+            } 
+            if (selectionProps.drawType == 'line') {
+                const bbox = e.target.getBoundingClientRect();
+                const x = e.clientX - selectionProps.offsetLeft, y = e.clientY - bbox.top + props.yAxisMap[0].y
+
+                const items: any = canvasItems;
+                
+                const item = canvasItems[drawContext];
+                
+                item.points[1] = mousetocoord(x,y);
+
+                items[drawContext] = item;
+
+                setCanvasItems({...items})
+            }
         }
     }
     const onDrawUp = (e: any) => {
         select_wasMoved = false;
+        setDrawContext(null);
     }
 
     //TODO multiple selections
@@ -232,34 +270,46 @@ const SelectionUtil = (selectionProps: any)  => {
     if (selectionProps.mode == "draw") {
         return (
             <g>
-                <path
-                    d={vXmap.reduce((acc: string, x: number, index: number) => {
-                        const [yA1, yA2] = resolveAxis(props, selectionProps.yAxisDomain);
-                        const [xA1, xA2] = resolveAxis(props, selectionProps.xAxisDomain);
+                {
+                    Object.keys(canvasItems).map(key => {
+                        const item = canvasItems[key];
+                        const xmap = item.points.map((point: any) => point.x);
+                        const ymap = item.points.map((point: any) => point.y);
 
-                        const scalex = scaleLinear()
-                            .domain([xA1, xA2])
-                            .range([0, props.xAxisMap[0].width]);
-                        const scaley = scaleLinear() 
-                            .domain([yA1, yA2])
-                            .range([props.yAxisMap[0].height, 0]);
-                        const xPos = scalex(x) + props.yAxisMap[0].width + props.yAxisMap[0].x
-                        const yPos = scaley(vYmap[index]) + props.yAxisMap[0].y 
-                        if (index == 0) {
-                            return  `M${xPos},${yPos}`
-                        } else if (index > 0) {
-                            return  acc + `L${xPos},${yPos}`
-                        } else {
-                            //Z
-                        }
-                        
-                    }, "")}
-                    style={{
-                        stroke: "red", 
-                        strokeWidth: 1,
-                        fillOpacity: 0,
-                    }}
-                />
+                        return (
+                            <path
+                                key={key}
+                                d={xmap.reduce((acc: string, x: number, index: number) => {
+                                    const [yA1, yA2] = resolveAxis(props, selectionProps.yAxisDomain);
+                                    const [xA1, xA2] = resolveAxis(props, selectionProps.xAxisDomain);
+            
+                                    const scalex = scaleLinear()
+                                        .domain([xA1, xA2])
+                                        .range([0, props.xAxisMap[0].width]);
+                                    const scaley = scaleLinear() 
+                                        .domain([yA1, yA2])
+                                        .range([props.yAxisMap[0].height, 0]);
+                                    const xPos = scalex(x) + props.yAxisMap[0].width + props.yAxisMap[0].x
+                                    const yPos = scaley(ymap[index]) + props.yAxisMap[0].y 
+                                    if (index == 0) {
+                                        return  `M${xPos},${yPos}`
+                                    } else if (index > 0) {
+                                        return  acc + `L${xPos},${yPos}`
+                                    } else {
+                                        //Z
+                                    }
+                                    
+                                }, "")}
+                                style={{
+                                    stroke: "red", 
+                                    strokeWidth: 1,
+                                    fillOpacity: 0,
+                                }}
+                            />
+                        );
+                    })
+                }
+                
                 <rect 
                     onMouseDown={onDrawDown}
                     onMouseMove={onDrawMove}

@@ -397,21 +397,52 @@ export default class Demo extends Component<any, any> {
             <ToolBar 
               displayMode={'visible'}
             >
-              <Camera/>
+              <Camera
+                onCapture={(e: any) => {}}
+              />
 
-              <ZoomSelect />
-              <ZoomIn />
-              <ZoomOut />
-              <Pan />
+              <ZoomSelect 
+                scale="log"
+              />
+              <ZoomIn 
+                scale="log"
+              />
+              <ZoomOut 
+                scale="log"
+              />
+              <Pan 
+                multiplier={0} //TODO control the speed
+              />
               <AutoScale />
               <Reset />
               <TooltipClosest />
               <TooltipCompare />
-              <BoxSelect onSelected={(points: any) => console.log(points)}/>
-              <LasoSelect onSelected={(points: any) => console.log(points)}/>
-              <ReferenceLines />
-              <Export />
-              <DrawTool />
+              <BoxSelect 
+                onSelected={(points: any) => console.log(points)}
+              />
+              <LasoSelect 
+                onSelected={(points: any) => console.log(points)}
+              />
+              <ReferenceLines 
+                fixed="price" //dataKey
+              /> 
+              {/* TODO */}
+              <Export 
+                type="csv"
+                header={[]} //override axis name/label
+                onDownload={(e: any) => {}}
+              />
+              {/* TODO */}
+              <DrawTool 
+                  type='polygon' 
+                  stroke='blue' 
+                  fill="green" 
+                  strokeWidth='2px' 
+                  strokeStyle="solid"
+                  state={{}}
+                  onChange={(e: any) => {}}
+              />
+              {/* TODO */}
               <Ruler />
             </ToolBar>
 

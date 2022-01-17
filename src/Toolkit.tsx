@@ -2,7 +2,7 @@ import React from 'react';
 import { Customized } from 'recharts';
 import { CustomTooltip } from './general/CustomTooltip';
 import AxisDragUtil from './utils/AxisDragUtil';
-import { formatTimeSeriesTicks, resolveAxis } from './utils/helpers';
+import { formatTimeSeriesTicks, resolveAxis, uid } from './utils/helpers';
 import SelectionUtil from './utils/SelectionUtil';
 import TooltipUtil from './utils/TooltipUtil';
 // import usePrevious from './utils/usePrevious';
@@ -15,8 +15,6 @@ export interface ToolkitProps {
     height: number;
 }
 export type Props = ToolkitProps;
-
-const uid = () => Date.now().toString(36) + Math.random().toString(36).substring(0,2);
 
 export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     const toolkit_graph_ref = React.useRef(`toolkit_ref_${uid()}`);
@@ -47,6 +45,7 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     const [enableReferenceLines, setEnableReferenceLines] = React.useState(false);
 
     const [ticks, setTicks] = React.useState([])
+    const [drawType, setDrawType] = React.useState('polygon')
 
     React.useEffect(() => {
         //TODO HANDLE THIS!!!
@@ -216,6 +215,8 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                                                     setEnableReferenceLines,
                                                     ticks,
                                                     setTicks,
+                                                    drawType,
+                                                    setDrawType
                                                 }
                                             );
                                         })
@@ -241,8 +242,6 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                     )
             }
           
-            {/* is this really slower than adding it to customized? */}
-            {/* drag layer */}
             {(graphStatetRef.current && hasSet) && 
                 //TODO: needs to be component
                 <svg 
@@ -279,6 +278,7 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                         }, 
                         ticks,
                         setTicks
+                        
                     }}/>
 
                     {selectState && <SelectionUtil {...{
@@ -288,6 +288,7 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                         setSelectState, 
                         yAxisDomain,
                         xAxisDomain,
+                        drawType,
                         offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0
                     }} />}
                 </svg>
@@ -296,6 +297,7 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
 
             {/* tooltip layer */}
             {tooltipCoord &&  <CustomTooltip {...{tooltipMode, tooltipCoord}}/> }
+
         </div>
     );
 });
