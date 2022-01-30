@@ -11,7 +11,7 @@ const config = {
   entry: './src/index.ts',
 
   output: {
-    filename: 'recharts-toolkit.js',
+    filename: 'RechartsToolkit.js',
   },
 
   module: {

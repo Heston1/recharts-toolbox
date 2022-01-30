@@ -1,6 +1,6 @@
 {
   "name": "recharts-toolkit",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Interactive graphing tools for recharts",
   "main": "lib/index.js",
   "module": "es6/index",
