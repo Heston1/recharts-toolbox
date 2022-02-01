@@ -1,11 +1,13 @@
 import React from 'react';
+import { getDomainOfDataByKey } from '../utils/helpers';
 
 export const AutoScale  = (props: any) => {
-    const {yAxisDomain, setYAxisDomain, setXAxisDomain, xAxisDomain} = props;
+    const {data, yAxisDomain, setYAxisDomain, setXAxisDomain, xAxisDomain} = props;
 
     const handleAutoSize = (e: any) => {
+        const xAxis = getDomainOfDataByKey(data, 'date', 'number'); //TODO
         setYAxisDomain(['auto', 'auto'])
-        // setXAxisDomain(['auto', 'auto'])
+        setXAxisDomain(xAxis)
     }
 
     // https://icons.getbootstrap.com/icons/aspect-ratio/

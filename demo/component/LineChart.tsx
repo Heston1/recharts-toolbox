@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { ResponsiveContainer, LineChart, ComposedChart , 
   Area, Line, Legend, XAxis, YAxis, CartesianGrid, ReferenceLine,
-    Label, LabelList, Brush, ScatterChart, ZAxis, Scatter, Polygon, Rectangle, Customized } from 'recharts';
+    Label, LabelList, Brush, ScatterChart, ZAxis, Scatter, Polygon, Rectangle, Customized, ReferenceArea, ReferenceDot } from 'recharts';
 import { Toolkit, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, 
   ToolBar, TooltipClosest, TooltipCompare, BoxSelect, LasoSelect,
    DrawTool, Export, ReferenceLines, Ruler } from 'recharts-toolkit';
@@ -27,21 +27,21 @@ const scatter02 = [
   { x: 210, y: 220, z: 230 },
 ];
 
-const randdist = Array.from(Array(100).keys()).map((x: number) => {
-  const rand = (min: number, max: number) =>  parseFloat((Math.random() * ((max) - (min) + 1) + (min)).toFixed(2));
-    return {
-      x,
-      y: rand(x-rand(0,50), x+rand(0,50))
-    }
-});
+// const randdist = Array.from(Array(100).keys()).map((x: number) => {
+//   const rand = (min: number, max: number) =>  parseFloat((Math.random() * ((max) - (min) + 1) + (min)).toFixed(2));
+//     return {
+//       x,
+//       y: rand(x-rand(0,50), x+rand(0,50))
+//     }
+// });
 
-const randdist2 = Array.from(Array(100).keys()).map((x: number) => {
-  const rand = (min: number, max: number) =>  parseFloat((Math.random() * ((max) - (min) + 1) + (min)).toFixed(2));
-    return {
-      x: x+rand(0,50),
-      y: rand(x-rand(0,50), x+rand(0,50))
-    }
-});
+// const randdist2 = Array.from(Array(100).keys()).map((x: number) => {
+//   const rand = (min: number, max: number) =>  parseFloat((Math.random() * ((max) - (min) + 1) + (min)).toFixed(2));
+//     return {
+//       x: x+rand(0,50),
+//       y: rand(x-rand(0,50), x+rand(0,50))
+//     }
+// });
 
 const data = [
   { name: 'Page A', uv: 1000, pv: 2400, amt: 2400, uvError: [75, 20] },
@@ -365,11 +365,12 @@ export default class Demo extends Component<any, any> {
 
   render() {
     return (
-      <div className="line-charts"  style={{margin: '0 25%'}}>
+      <div className="line-charts"  style={{margin: '0 15%'}}>
 
         <div className="line-chart-wrapper">
           <button onClick={e => {
-              //TODO track button for real time
+
+             
               this.setState({isrealtime: !this.state.isrealtime}, () => {
                 if (this.state.isrealtime) {
                   realTimeSim = setInterval(() => {
@@ -392,31 +393,55 @@ export default class Demo extends Component<any, any> {
                 }
               });
           }}>{this.state.isrealtime ? 'stop real time' : 'start real time'}</button>
-          <Toolkit>
+
+          <Toolkit
+            //TODO use components outside of here
+          >
 
             <ToolBar 
-              displayMode={'visible'}
+              displayMode='visible' //TODO
             >
               <Camera
-                onCapture={(e: any) => {}}
+                onCapture={(e: any) => {
+                  // e.preventDefault() TODO
+                }}
+                //icon
+                //is toggled
               />
 
               <ZoomSelect 
-                scale="log"
+                scale="log" 
+                //TODO
+                //linear
+                //exp
+                //fn: () => number
               />
               <ZoomIn 
                 scale="log"
+                //linear
+                //exp
+                //fn: () => number
               />
               <ZoomOut 
                 scale="log"
+                //linear
+                //exp
+                //fn: () => number
               />
               <Pan 
-                multiplier={0} //TODO control the speed
+                speed={0} //TODO
+                //fixed x/y
               />
-              <AutoScale />
-              <Reset />
+              <AutoScale 
+                //finds best fit for data
+              />
+              <Reset 
+                //clears drawings, axis etc.
+              /> 
+
               <TooltipClosest />
               <TooltipCompare />
+
               <BoxSelect 
                 onSelected={(points: any) => console.log(points)}
               />
@@ -424,26 +449,32 @@ export default class Demo extends Component<any, any> {
                 onSelected={(points: any) => console.log(points)}
               />
               <ReferenceLines 
-                fixed="price" //dataKey
+                fixed="price" //TODO dataKey, cursor, dynamic
               /> 
-              {/* TODO */}
+             
               <Export 
                 type="csv"
                 header={[]} //override axis name/label
-                onDownload={(e: any) => {}}
+                beforeDownload={(e: any) => {}} //modify here before downloading
+                onDownload={(e: any) => {}} //do what you want with the csv file
               />
-              {/* TODO */}
+
+              
               <DrawTool 
-                  type='polygon' 
+                  type='pen' 
                   stroke='blue' 
                   fill="green" 
                   strokeWidth='2px' 
                   strokeStyle="solid"
-                  state={{}}
+                  // state={{}} if state not provided handle internally 
                   onChange={(e: any) => {}}
+                  //edit/lock
+                  // animation
               />
-              {/* TODO */}
+              
               <Ruler />
+              
+              {/* TODO track to last */}
             </ToolBar>
 
             <ResponsiveContainer height={400}>
@@ -513,118 +544,96 @@ export default class Demo extends Component<any, any> {
                   </YAxis>
                   <Legend iconType="plainline" align="left" verticalAlign="top" margin={{ top: 0, left: 200, right: 0, bottom: 0 }}/>
                   <YAxis  label="test" orientation="right"/>
-                  <Line name="CLOSE" dataKey="price" stroke="#0f69ff" dot={false} connectNulls isAnimationActive={false} animationDuration={0} />
+                  <Line name="CLOSE" dataKey="price" stroke="#0f69ff" dot={false} connectNulls />
                   {/* period, field, type, offset */}
-                  <Line name="MA (20, C, MA, 0)" dataKey="ma" stroke="#7e1fff" dot={false} isAnimationActive={false} animationDuration={0}/>
-                  <Line name="MA (20, C, EMA, 0)" dataKey="middleband" stroke="orange" dot={false} connectNulls isAnimationActive={false} animationDuration={0}/>
+                  <Line name="MA (20, C, MA, 0)" dataKey="ma" stroke="#7e1fff" dot={false} />
+                  <Line name="MA (20, C, EMA, 0)" dataKey="middleband" stroke="orange" dot={false} connectNulls />
                   {/* period, field, standard deviations, type */}
-                  <Area name="BOLLINGER BANDS (20, C, 2, EMA)" dataKey="bollinger" stroke="orange" strokeWidth={1} connectNulls  fill="orange" fillOpacity={0.1} isAnimationActive={false} animationDuration={0}/>
+                  <Area name="BOLLINGER BANDS (20, C, 2, EMA)" dataKey="bollinger" stroke="orange" strokeWidth={1} connectNulls  fill="orange" fillOpacity={0.1} />
                 </ComposedChart>
             </ResponsiveContainer>
           </Toolkit>
+
+          <p><i>Stock graph example</i></p>
         </div>
 
-        <p>A simple LineChart with fixed domain y-axis</p>
+        {/* 
         <div className="line-chart-wrapper">
           <Toolkit>
 
             <ToolBar 
               displayMode={'visible'}
             >
-              <Camera/>
-
-              <ZoomSelect />
-              <ZoomIn />
-              <ZoomOut />
-              <Pan />
-              <AutoScale />
-              <Reset />
-              <TooltipClosest />
-              <TooltipCompare />
-              <BoxSelect onSelected={(points: any) => console.log(points)}/>
-              <LasoSelect onSelected={(points: any) => console.log(points)}/>
               <ReferenceLines />
-              <Export />
-              <DrawTool />
-              <Ruler />
             </ToolBar>
-            {/* <ResponsiveContainer height={400}> */}
+            <ResponsiveContainer height={400}>
             <LineChart width={600} height={400} data={data02} syncId="test">
               <CartesianGrid stroke="#f5f5f5" fill="#e6e6e6" />
-              <Legend
-                // onMouseEnter={this.handleLegendMouseEnter}
-                // onMouseLeave={this.handleLegendMouseLeave}
-              />
               <XAxis type="number" dataKey="pv" height={40}>
-                <Label value="x" position="insideBottom" />
+                <Label value="x" position="insideBottom"/>
               </XAxis>
               <YAxis type="number" unit="%" width={80}>
                 <Label value="y" position="insideLeft" angle={90} />
               </YAxis>
-              {/* <Tooltip trigger="click" /> */}
               <Line
                 key="uv"
                 type="monotone"
                 dataKey="uv"
                 stroke="#ff7300"
-                // dot={renderSpecialDot}
-                // strokeOpacity={opacity}
                 strokeDasharray="3 3"
               >
                 <LabelList position="bottom" offset={10} dataKey="name" />
               </Line>
-              {/* <Brush dataKey="name" height={30} /> TODO handle brush*/}
             </LineChart>
             
-            {/* </ResponsiveContainer> */}
+            </ResponsiveContainer>
           </Toolkit>
-        </div>
+        </div> */}
               
         <div className="line-chart-wrapper">
-          {/* <Toolkit> */}
-
-            {/* <ToolBar 
+          Reference Line: <select>
+            <option>fixed (dataKey)</option>
+            <option>cursor</option>
+            {/* <option>dynamic fn</option> */}
+          </select>
+          <Toolkit>
+            <ToolBar 
               displayMode={'visible'}
             >
-              <Camera/>
-
               <ZoomSelect />
               <ZoomIn />
               <ZoomOut />
               <Pan />
               <AutoScale />
-              <Reset />
               <TooltipClosest />
               <TooltipCompare />
               <BoxSelect onSelected={(points: any) => console.log(points)}/>
               <LasoSelect onSelected={(points: any) => console.log(points)}/>
               <ReferenceLines />
-              <Export />
-              <DrawTool />
-              <Ruler />
-            </ToolBar> */}
-            <ScatterChart width={400} height={400} margin={{ top: 20, right: 20, bottom: 0, left: 20 }}>
+            </ToolBar> 
+            <ScatterChart width={400} height={400} margin={{ top: 20, right: 20, bottom: 0, left: 20 }}> 
                 <XAxis type="number" dataKey="x" name="stature" unit="cm" />
-                <YAxis type="number" dataKey="y" name="weight" unit="kg" />
-                {/* <ZAxis type="number" dataKey="z" range={[50, 1200]} name="score" unit="km" /> */}
+                <YAxis type="number" dataKey="y" name="weight" unit="kg" /> 
+                <ZAxis type="number" dataKey="z" range={[50, 1200]} name="score" unit="km" />
                 <CartesianGrid />
                 <Scatter 
                   name="A school" 
-                  data={randdist} 
+                  data={scatter01} 
                   type="number"
-                  fillOpacity={0.3} fill="#ff7300" 
+                  fillOpacity={0.3} 
+                  fill="#ff7300" 
                 />
-                <Scatter name="B school" data={randdist2} fill="#347300" />
-                {/* <Tooltip trigger="click" /> */}
+                <Scatter name="B school" data={scatter02} fill="#347300" />
                 <Legend/>
-                {/* <ReferenceArea x1={250} x2={300} alwaysShow label="any label" /> */}
-                {/* <ReferenceLine x={159} stroke="red"/>
+                <ReferenceArea x1={250} x2={300} ifOverflow="extendDomain" label="any label" />
+                <ReferenceLine x={159} stroke="red"/>
                 <ReferenceLine y={237.5} stroke="red"/>
-                <ReferenceDot x={170} y={290} r={15} label="AB" stroke="none" fill="red" isFront/> */}
+                <ReferenceDot x={170} y={290} r={15} label="AB" stroke="none" fill="red" isFront/>
             </ScatterChart>
-          {/* </Toolkit> */}
-
+          </Toolkit>
+          <p><i>Yahoo finance earnings graph example</i></p>
         </div>
+        
       </div>  
     );
   }

@@ -9,7 +9,7 @@ const SelectionUtil = (selectionProps: any)  => {
     const [start, setStart] = React.useState(null);
     const [end, setEnd] = React.useState(null);
     const [path, setPath] = React.useState("");
-    const [canvasItems, setCanvasItems] = React.useState({});
+    const [canvasItems, setCanvasItems]: any = React.useState({});
     const [drawContext, setDrawContext] = React.useState(null);
     const [maskOpacity, setMaskOpacity] = React.useState(0);
     
@@ -151,11 +151,15 @@ const SelectionUtil = (selectionProps: any)  => {
         const id = uid();
         const items: any = canvasItems;
         const newItem = {
-            type: 'line',
+            type: selectionProps.drawType,
             id,
             points: [
-                mousetocoord(x,y)
-            ]
+                {
+                    ...mousetocoord(x,y),
+                    command: selectionProps.drawType == 'ellipse' && 'I'
+                }
+            ],
+            
         };
         items[id] = newItem;
         setCanvasItems(items);
@@ -163,7 +167,7 @@ const SelectionUtil = (selectionProps: any)  => {
     }
     const onDrawMove = (e: any) => {
         if (select_wasMoved) {
-            if (selectionProps.drawType == 'polygon') {
+            if (selectionProps.drawType == 'polygon' || selectionProps.drawType == 'pen') {
                 const bbox = e.target.getBoundingClientRect();
                 const x = e.clientX - selectionProps.offsetLeft, y = e.clientY - bbox.top + props.yAxisMap[0].y
 
@@ -189,6 +193,70 @@ const SelectionUtil = (selectionProps: any)  => {
                 
                 item.points[1] = mousetocoord(x,y);
 
+                items[drawContext] = item;
+
+                setCanvasItems({...items})
+            }
+            if (selectionProps.drawType == 'rectangle') {
+                const bbox = e.target.getBoundingClientRect();
+                const x = e.clientX - selectionProps.offsetLeft, y = e.clientY - bbox.top + props.yAxisMap[0].y
+
+                const items: any = canvasItems;
+                
+                const item = canvasItems[drawContext];
+                const end = mousetocoord(x,y);
+                const start = item.points[0];
+                item.points[1] = {//top right
+                    x: end.x,
+                    y: start.y
+                };
+                item.points[2] = end;
+                item.points[3] = {
+                    x: start.x,
+                    y: end.y
+                }
+                item.points[4] = start;
+
+                items[drawContext] = item;
+
+                setCanvasItems({...items})
+            }
+            if (selectionProps.drawType == 'ellipse') {
+                const bbox = e.target.getBoundingClientRect();
+                const x = e.clientX - selectionProps.offsetLeft, y = e.clientY - bbox.top + props.yAxisMap[0].y
+
+                const items: any = canvasItems;
+                
+                const item = canvasItems[drawContext];
+                const end = mousetocoord(x,y);
+                const start = item.points[0];
+                item.points[1] = {
+                    x: start.x,
+                    y: start.y - ((start.y-end.y)/2),
+                    command: 'M'
+                }
+                item.points[2] = {
+                    x: start.x,
+                    y: start.y + ((start.y-end.y)/2),
+                    command: 'C'
+                }
+               
+                item.points[3] = {//top right
+                    x: start.x + ((end.x-start.x)),
+                    y: start.y,
+                    command: 'CP'
+                };
+                item.points[4] = {
+                    x: 0,
+                    y: 0,
+                    command: 'SF'
+                }
+                item.points[5] = {
+                    x: end.x,
+                    y: start.y - ((start.y-end.y)/2),
+                    command: 'CP'
+                }
+               
                 items[drawContext] = item;
 
                 setCanvasItems({...items})
@@ -271,7 +339,7 @@ const SelectionUtil = (selectionProps: any)  => {
         return (
             <g>
                 {
-                    Object.keys(canvasItems).map(key => {
+                    Object.keys(canvasItems).map((key: any) => {
                         const item = canvasItems[key];
                         const xmap = item.points.map((point: any) => point.x);
                         const ymap = item.points.map((point: any) => point.y);
@@ -282,6 +350,7 @@ const SelectionUtil = (selectionProps: any)  => {
                                 d={xmap.reduce((acc: string, x: number, index: number) => {
                                     const [yA1, yA2] = resolveAxis(props, selectionProps.yAxisDomain);
                                     const [xA1, xA2] = resolveAxis(props, selectionProps.xAxisDomain);
+                                    const command = item.points[index].command
             
                                     const scalex = scaleLinear()
                                         .domain([xA1, xA2])
@@ -291,10 +360,30 @@ const SelectionUtil = (selectionProps: any)  => {
                                         .range([props.yAxisMap[0].height, 0]);
                                     const xPos = scalex(x) + props.yAxisMap[0].width + props.yAxisMap[0].x
                                     const yPos = scaley(ymap[index]) + props.yAxisMap[0].y 
-                                    if (index == 0) {
+                                    if (index == 0 || command == 'M') {
                                         return  `M${xPos},${yPos}`
-                                    } else if (index > 0) {
-                                        return  acc + `L${xPos},${yPos}`
+                                    } else if (index > 0 ) {
+                                        if (command == "C") {
+
+                                        }
+                                        // if (ry == null) ry = rx;
+                                        // return `
+                                        //     M${cx-rx} ${cy}a${rx} ${ry} 
+                                        //     0 1 0 ${rx*2} 0a${rx},${ry} 
+                                        //     0 1 0 -${rx*2},0`;
+
+                                        if (command == null || command == "L") {
+                                            return  acc + `L${xPos},${yPos}`
+                                        } 
+                                        // if (command == "C") {
+                                        //     return  acc + `A${xPos},${yPos}`
+                                        // }
+                                        // if (command == "CP") {
+                                        //     return  acc + `,${xPos},${yPos}`
+                                        // }
+                                        // if (command == "SF") {
+                                        //     return  acc + `,1`
+                                        // }
                                     } else {
                                         //Z
                                     }

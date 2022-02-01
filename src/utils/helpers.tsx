@@ -1,3 +1,11 @@
+
+/**
+ * 
+ * @param arr 
+ * @returns 
+ */
+export const flatten = (arr:any) => [].concat(...arr);
+
 /**
  * 
  * @param customizedProps 
@@ -6,20 +14,22 @@
  */
 export const resolveAxis = (customizedProps: any, axisDomain: any) => {
     //TODO if category just get first and last
+    //TODO /src/util/ChartUtils.ts:getDomainOfDataByKey 
     let resolvedDomain: any = [axisDomain[0], axisDomain[1]];
 
     if (axisDomain[0] == 'auto' || axisDomain[1] == 'auto') {    
-        const flatten = (arr:any) => [].concat(...arr);
-        const points = customizedProps.formattedGraphicalItems
-                .reduce((acc: any, items: any) => {//TODO can be memo'd?
-                    if (items.props.points[0] && items.props.points[0].value instanceof Array) {
-                        return acc.concat(flatten(items.props.points.map((point: any) => flatten(point.value))))
-                    } else {
-                        return acc.concat(flatten(items.props.points.map((point: any) => point.value)))
-                    }
-                }, [])
-                .filter((value: any) => !isNaN(value) && !isNaN(value) && value != null && value != null);
-        //TODO round
+        const points: Array<any> = customizedProps.formattedGraphicalItems
+            .reduce((acc: any, items: any) => {
+                console.log(items)
+                if (items.props.points[0] && items.props.points[0].value instanceof Array) { //TODO value?
+                    return acc.concat(flatten(items.props.points.map((point: any) => flatten(point.value || point.y))))
+                } else {
+                    return acc.concat(flatten(items.props.points.map((point: any) => point.value || point.y)))
+                }
+            }, [])
+            .filter((value: any) => !isNaN(value) && !isNaN(value) && value != null && value != null);
+    
+        //TODO rounding issues
         if (axisDomain[0] == 'auto') {
             resolvedDomain[0] = Math.min(...points);
         } 
@@ -31,6 +41,16 @@ export const resolveAxis = (customizedProps: any, axisDomain: any) => {
 
     return resolvedDomain;
 };
+
+export const getDomainOfDataByKey = (data: Array<any>, key: string, type: string) => {
+    const arr = data.map(point => point[key]);
+    if (type != 'number') {
+        return [0, arr.length]
+    } else {
+        return [Math.min(...arr), Math.max(...arr)]
+    }
+}
+
 /**
  * 
  * @returns 
@@ -128,6 +148,8 @@ export const formatTimeSeriesTicks = (interval: any, date: Date) => {
     const week = day*7;
     const month = (52*week)/12;
     const year = (12*month);
+
+    if (isNaN(interval)) return ''; //TODO if domain is not set 
 
     const formattedMilli = ("000" + date.getMilliseconds()).slice(-4);
     const formattedSec = ("0" + date.getSeconds()).slice(-2);

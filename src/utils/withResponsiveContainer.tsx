@@ -1,9 +1,10 @@
 import React from 'react';
 
+//TODO some weird issues with this 
 export const withResponsiveContainer = (Component: any) => {
     return (props: any) => {
         const [responsiveContainer, setResponsiveContainer] = React.useState(null)
-        React.useEffect(() => {
+        React.useEffect(() => { 
             const setComponents = (child: any) => {
                 if (child.type.name == null && child.props.children instanceof Object) {
                     if (child.props.children?.type.name == "CategoricalChartWrapper") {

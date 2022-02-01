@@ -2,13 +2,13 @@ import React from 'react';
 import { Customized } from 'recharts';
 import { CustomTooltip } from './general/CustomTooltip';
 import AxisDragUtil from './utils/AxisDragUtil';
-import { formatTimeSeriesTicks, resolveAxis, uid } from './utils/helpers';
+import { formatTimeSeriesTicks, resolveAxis, uid, flatten } from './utils/helpers';
 import SelectionUtil from './utils/SelectionUtil';
 import TooltipUtil from './utils/TooltipUtil';
 // import usePrevious from './utils/usePrevious';
 import { withFading } from './utils/withFading';
 import { withResponsiveContainer } from './utils/withResponsiveContainer';
-
+import { getDomainOfDataByKey } from './utils/helpers';
 export interface ToolkitProps {
     children: JSX.Element | JSX.Element[] | string;
     width: number;
@@ -28,9 +28,11 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     const [toolbarComponents, setToolbarComponents] = React.useState(null);
 
     const [yAxisDomain, setYAxisDomain]: any = React.useState(['auto', 'auto']); 
-    const [xAxisDomain, setXAxisDomain]: any = React.useState([1451865600, 1483056000]); // 1451865600, 1483056000
+    const [xAxisDomain, setXAxisDomain]: any = React.useState(['auto', 'auto']); // 1451865600, 1483056000
     // const prevXAxisDomain = usePrevious(xAxisDomain);
     // const prevYAxisDomain = usePrevious(yAxisDomain);
+
+    const [actionState, setActionState] = React.useState(null); 
 
     const [selectState, setSelectState] = React.useState(null); //zoom, select, laso
     const [selectCoords, setSelectCoords] = React.useState(null);
@@ -47,16 +49,6 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     const [ticks, setTicks] = React.useState([])
     const [drawType, setDrawType] = React.useState('polygon')
 
-    React.useEffect(() => {
-        //TODO HANDLE THIS!!!
-        const xAxis = resolveAxis(graphStatetRef.current, xAxisDomain);
-
-        let tmp = [], x1 = xAxis[0], x2 = xAxis[1], tickCount = 5;
-        for (let numTick = 0; numTick < tickCount; numTick++) {
-            tmp.push((x1+(((x2-x1)/tickCount)*numTick)));
-        }
-        setTicks(tmp)
-    }, [])
     
     React.useEffect(() => {
         const setComponents = (child: any) => {
@@ -87,9 +79,37 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
             setParent(null);
             console.warn("CategoricalChartWrapper is not a child of Toolkit.")
         }   
-
-        
     }, [props.children]);
+
+
+    const getXAxisKey = (node: any) => {
+        // const lookup = node.type.displayName == "ScatterChart" ? 'Scatter' : 'XAxis'
+        return node.props.children.filter((n: any) => n.type.name == 'XAxis')[0].props.dataKey;
+    }
+
+    const getData = (node: any) => {
+        if (node.type.displayName == "ScatterChart") {
+            return flatten(node.props.children.filter((n: any) => n.type.name == 'Scatter').map((n: any) => n.props.data));
+        }
+        else {
+            return node.props.data;
+        }
+    }
+
+    React.useEffect(() => {
+        if (parent && (typeof xAxisDomain[0] == 'string' || typeof xAxisDomain[1] == 'string')) { 
+            // console.log(parent)
+            // console.log(getData(parent))
+            const xAxis = getDomainOfDataByKey(getData(parent), getXAxisKey(parent), 'number'); //TODO
+      
+            let tmp = [], x1 = xAxis[0], x2 = xAxis[1], tickCount = 5;
+            for (let numTick = 0; numTick < tickCount; numTick++) {
+                tmp.push((x1+(((x2-x1)/tickCount)*numTick)));
+            }
+            setTicks(tmp)
+            setXAxisDomain(xAxis)
+        }
+    }, [parent])
 
     const proxy = () => (
         <Customized component={(customizedProps: any) => {
@@ -116,8 +136,7 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
             if (child == null) {//TODO load proxy first
                 return;
             }
-           
-            //Acts as middleware to inject toolkit props into recharts components
+
             //TODO handle non-integer keys, datetime etc.
          
             const xAxisConfig = (child: any) => {
@@ -178,7 +197,7 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     return (
         <div ref={containerRef} style={{position: 'relative'}}>
            
-            {   
+            {parent &&   
                 withFading({
                     element: <div
                                 ref={toolbarRef} 
@@ -198,6 +217,7 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                                                 child, 
                                                 {
                                                     ...graphStatetRef.current, 
+                                                    data: parent.props.data,
                                                     graph_uid: toolkit_graph_ref.current,
                                                     yAxisDomain, 
                                                     setYAxisDomain,

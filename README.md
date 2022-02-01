@@ -1,9 +1,9 @@
-**\*\*This library is still under development 0.x and should not be used for production, the API could change and it is not recommended for use at the current moment in time.\*\***
+**\*\*This library is still under development 0.x and should not be used for production, the API could change and it is not recommended for use at this current moment in time.\*\***
 
 ---
 
 # recharts-toolkit
-Recharts-toolkit is the **unofficial** wrapper library that provides out of the box interactive graphing components and more. While Recharts aims to keep its "API surface small and straightforward", it's quite limited and requires tedious workarounds for more complex requirements. The purpose of this library is to make recharts more extensible and provide tools to make your graphs interactive all while being a 'thin' layer on top of recharts. Recharts-toolkit is compatible with your existing recharts graph definition. 
+Recharts-toolkit is the **unofficial** wrapper library that provides out of the box interactive graphing components and more. Although Recharts aims to keep its "API surface small and straightforward", it requires tedious workarounds for more complex requirements. The purpose of this library is to make recharts more extensible and provide tools to make your graphs interactive all while being a 'thin' layer on top of recharts. Recharts-toolkit is compatible with your existing recharts graph definition. 
 
 ## Example
 

@@ -1,6 +1,6 @@
 {
   "name": "recharts-toolkit",
-  "version": "0.3.0",
+  "version": "0.4.3",
   "description": "Interactive graphing tools for recharts",
   "main": "lib/index.js",
   "module": "es6/index",
@@ -97,9 +97,9 @@
     "prettier": "^2.2.1",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
-    "recharts": "^2.1.8",
     "react-router-dom": "^5.1.2",
     "react-test-renderer": "^16.12.0",
+    "recharts": "^2.1.8",
     "rimraf": "^3.0.2",
     "sinon": "^9.2.2",
     "terser-webpack-plugin": "^5.1.1",
@@ -111,9 +111,9 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
+    "@types/d3-interpolate": "^2.0.0",
     "@types/d3-scale": "^3.0.0",
     "@types/d3-shape": "^2.0.0",
-    "@types/d3-interpolate": "^2.0.0",
     "classnames": "^2.2.5",
     "d3-interpolate": "^2.0.0",
     "d3-scale": "^3.0.0",
