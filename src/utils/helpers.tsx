@@ -16,20 +16,29 @@ export const resolveAxis = (customizedProps: any, axisDomain: any) => {
     //TODO if category just get first and last
     //TODO /src/util/ChartUtils.ts:getDomainOfDataByKey 
     let resolvedDomain: any = [axisDomain[0], axisDomain[1]];
-
+    
     if (axisDomain[0] == 'auto' || axisDomain[1] == 'auto') {    
         const points: Array<any> = customizedProps.formattedGraphicalItems
             .reduce((acc: any, items: any) => {
-                console.log(items)
-                if (items.props.points[0] && items.props.points[0].value instanceof Array) { //TODO value?
-                    return acc.concat(flatten(items.props.points.map((point: any) => flatten(point.value || point.y))))
-                } else {
-                    return acc.concat(flatten(items.props.points.map((point: any) => point.value || point.y)))
+                const getValues = (data: any) => {
+                    if (data[0] && data[0].value instanceof Array) { //TODO value?
+                        return acc.concat(flatten(data.map((point: any) => flatten(point.value || point.y))))
+                    } else {
+                        return acc.concat(flatten(data.map((point: any) => point.value || point.y)))
+                    }
                 }
+                // console.log(items)
+                if (items.props.hasOwnProperty("points")) {
+                    // console.log("here")
+                    return getValues(items.props.points)
+                } else if (items.props.hasOwnProperty("data")) {
+                    // console.log("here1")
+                    return getValues(items.props.data)
+                }
+                
             }, [])
             .filter((value: any) => !isNaN(value) && !isNaN(value) && value != null && value != null);
     
-        //TODO rounding issues
         if (axisDomain[0] == 'auto') {
             resolvedDomain[0] = Math.min(...points);
         } 

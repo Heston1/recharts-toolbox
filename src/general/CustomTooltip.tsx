@@ -5,6 +5,7 @@ export const CustomTooltip = (props: any) => {
     
     return (
         <div 
+            className="recharts-tooltip"
             style={{
                 position: 'absolute', 
                 top: tooltipCoord.y + 10, 

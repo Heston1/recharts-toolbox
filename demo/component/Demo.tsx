@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { ResponsiveContainer, LineChart, ComposedChart , 
   Area, Line, Legend, XAxis, YAxis, CartesianGrid, ReferenceLine,
-    Label, LabelList, Brush, ScatterChart, ZAxis, Scatter, Polygon, Rectangle, Customized, ReferenceArea, ReferenceDot } from 'recharts';
+    Label, LabelList, Brush, ScatterChart, ZAxis, Scatter, Polygon, Rectangle, Customized, ReferenceArea, ReferenceDot, BarChart, Bar } from 'recharts';
 import { Toolkit, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, 
   ToolBar, TooltipClosest, TooltipCompare, BoxSelect, LasoSelect,
-   DrawTool, Export, ReferenceLines, Ruler } from 'recharts-toolkit';
+   DrawTool, Export, ReferenceLines, Ruler, Icons } from 'recharts-toolkit';
 import { changeNumberOfData } from './utils';
 import * as _ from 'lodash';
 
@@ -43,7 +43,7 @@ const scatter02 = [
 //     }
 // });
 
-const data = [
+const dataCat = [
   { name: 'Page A', uv: 1000, pv: 2400, amt: 2400, uvError: [75, 20] },
   { name: 'Page B', uv: 300, pv: 4567, amt: 2400, uvError: [90, 40] },
   { name: 'Page C', uv: 280, pv: 1398, amt: 2400, uvError: 40 },
@@ -349,7 +349,7 @@ const initialState = {
 let realTimeSim: any, LASTMA: number;
 export default class Demo extends Component<any, any> {
 
-  static displayName = 'LineChartDemo';
+  static displayName = 'RechartsToolkitDemo';
 
   state: any = initialState;
 
@@ -366,33 +366,57 @@ export default class Demo extends Component<any, any> {
   render() {
     return (
       <div className="line-charts"  style={{margin: '0 15%'}}>
+        <h2 style={{color: 'red', marginBottom: '20px', marginTop: '50px'}}><b>**This library is still under development 0.x and should not be used for production, the API could change and it is not recommended for use at this current moment in time.**</b></h2>
+        <hr/>
+        <div>
+          <h1>Recharts-toolkit</h1>
+          <p>Recharts wrapper for interactive visualisations</p>
 
+        </div>
+        <hr/>
+        <div>
+          <h3>Installation</h3>
+        </div>
+        <hr/>
+        <div>
+          <h3>Examples</h3>
+        </div>
         <div className="line-chart-wrapper">
-          <button onClick={e => {
-
-             
-              this.setState({isrealtime: !this.state.isrealtime}, () => {
-                if (this.state.isrealtime) {
-                  realTimeSim = setInterval(() => {
-                    if (this.state.date == 512) {
-                      clearInterval(realTimeSim);
-                      realTimeSim = null;
-                      return;
-                    }
-                    const date = this.state.date + 1;
-                    const lastentry = this.state.data[this.state.data.length-1].price;
-                    const price = parseFloat((Math.random() * ((lastentry + 3) - (lastentry - 3) + 1) + (lastentry - 3)).toFixed(2));
-                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    //you may see missing points because its dividing by 30 and not alternating by month
-                    const data = this.state.data.concat([{ date: `${months[parseInt('' + (date/30))]} ${date%30} 2017`, price}])
-                    this.setState({ date,price,data});
-                  }, 3000);
-                } else {
-                  clearInterval(realTimeSim);
-                  realTimeSim = null;
-                }
-              });
-          }}>{this.state.isrealtime ? 'stop real time' : 'start real time'}</button>
+          <p><i>Zoom, pan and timeseries graph example</i></p>
+          <ul>
+            <li>Drag the x or y axis to pan, dragging the edges of the axis will logarithmically scale</li>
+            <li>You can also drag the edges of the graph to scale by both the x and y axis e.g. hover your cursor just below the x and y axis (origin)</li>
+            {/* <li>Use the middle mouse button (scroll wheel) to scale horizontally</li> */}
+            <li>
+              You can also use the pan tool (<Icons.PanIcon width="13" height="13"/>) and zoom tools (<Icons.ZoomSelectIcon width="13" height="13"/>/<Icons.ZoomInIcon width="13" height="13"/>/<Icons.ZoomOutIcon width="13" height="13"/>) on the toolbar
+            </li>
+            <li>
+              Press the start button to add data every <input type="text" value="3" style={{width: '30px', textAlign: 'right'}} /> seconds:  <button onClick={e => {
+                this.setState({isrealtime: !this.state.isrealtime}, () => {
+                  if (this.state.isrealtime) {
+                    realTimeSim = setInterval(() => {
+                      if (this.state.date == 512) {
+                        clearInterval(realTimeSim);
+                        realTimeSim = null;
+                        return;
+                      }
+                      const date = this.state.date + 1;
+                      const lastentry = this.state.data[this.state.data.length-1].price;
+                      const price = parseFloat((Math.random() * ((lastentry + 3) - (lastentry - 3) + 1) + (lastentry - 3)).toFixed(2));
+                      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                      //you may see missing points because its dividing by 30 and not alternating by month
+                      const data = this.state.data.concat([{ date: `${months[parseInt('' + (date/30))]} ${date%30} 2017`, price}])
+                      this.setState({ date,price,data});
+                    }, 3000);
+                  } else {
+                    clearInterval(realTimeSim);
+                    realTimeSim = null;
+                  }
+                });
+                }}>{this.state.isrealtime ? 'stop' : 'start'}</button>
+            </li>
+          </ul>
+         
 
           <Toolkit
             //TODO use components outside of here
@@ -435,9 +459,9 @@ export default class Demo extends Component<any, any> {
               <AutoScale 
                 //finds best fit for data
               />
-              <Reset 
+              {/* <Reset 
                 //clears drawings, axis etc.
-              /> 
+              />  */}
 
               <TooltipClosest />
               <TooltipCompare />
@@ -472,7 +496,7 @@ export default class Demo extends Component<any, any> {
                   // animation
               />
               
-              <Ruler />
+              {/* <Ruler /> */}
               
               {/* TODO track to last */}
             </ToolBar>
@@ -531,9 +555,7 @@ export default class Demo extends Component<any, any> {
                 }
                 margin={{ top: 40, right: 40, bottom: 20, left: 20 }}
               >
-                  <CartesianGrid verticalFill={["#ffffff", "#efefef"]} vertical={true} horizontal={true} > 
-                    <Rectangle x={0} y={0} width={100} height={100}></Rectangle>
-                  </CartesianGrid>
+                  <CartesianGrid strokeDasharray="3 3" />
                   {/* TODO override types? */}
                   {/*  @ts-ignore */}
                   <XAxis dataKey="date" type="time">
@@ -542,98 +564,105 @@ export default class Demo extends Component<any, any> {
                   <YAxis >
                     <Label value="Stock Price" position="insideLeft" angle={90} />
                   </YAxis>
-                  <Legend iconType="plainline" align="left" verticalAlign="top" margin={{ top: 0, left: 200, right: 0, bottom: 0 }}/>
+                  {/* <Legend iconType="plainline" align="left" verticalAlign="top" margin={{ top: 0, left: 200, right: 0, bottom: 0 }}/> */}
                   <YAxis  label="test" orientation="right"/>
                   <Line name="CLOSE" dataKey="price" stroke="#0f69ff" dot={false} connectNulls />
                   {/* period, field, type, offset */}
-                  <Line name="MA (20, C, MA, 0)" dataKey="ma" stroke="#7e1fff" dot={false} />
+                  <Line name="MA (20, C, MA, 0)" dataKey="ma" stroke="#7e1fff" dot={false} connectNulls />
                   <Line name="MA (20, C, EMA, 0)" dataKey="middleband" stroke="orange" dot={false} connectNulls />
                   {/* period, field, standard deviations, type */}
                   <Area name="BOLLINGER BANDS (20, C, 2, EMA)" dataKey="bollinger" stroke="orange" strokeWidth={1} connectNulls  fill="orange" fillOpacity={0.1} />
                 </ComposedChart>
             </ResponsiveContainer>
           </Toolkit>
-
-          <p><i>Stock graph example</i></p>
         </div>
 
-        {/* 
         <div className="line-chart-wrapper">
+          <p><i>Selection example with scatter graph</i></p>
+          <ul>
+            <li>Utilise the select laso (<Icons.LasoSelectIcon width="13" height="13"/>) and box select (<Icons.BoxSelectIcon width="13" height="13"/>) tools to select data from the graph
+            </li>
+            {/* <li>Hold <code>Shift</code> while clicking to make multiple selections</li> */}
+          </ul>
+          <div style={{display: 'flex'}}>
+            <Toolkit>
+              <ToolBar 
+                displayMode={'visible'}
+              >
+                <ZoomSelect />
+                <ZoomIn />
+                <ZoomOut />
+                <Pan />
+                <AutoScale />
+                {/* <TooltipClosest />
+                <TooltipCompare /> */}
+                <BoxSelect onSelected={(points: any) => this.setState({scatterPoints: points})}/>
+                <LasoSelect onSelected={(points: any) => this.setState({scatterPoints: points})}/>
+                {/* <ReferenceLines /> */}
+              </ToolBar> 
+              <ScatterChart width={400} height={400} margin={{ top: 20, right: 20, bottom: 0, left: 20 }}> 
+                  <XAxis type="number" dataKey="x" name="stature" unit="cm" />
+                  <YAxis type="number" dataKey="y" name="weight" unit="kg" /> 
+                  <ZAxis type="number" dataKey="z" range={[50, 1200]} name="score" unit="km" />
+                  <CartesianGrid />
+                  <Scatter 
+                    name="A school" 
+                    data={scatter01} 
+                    type="number"
+                    fillOpacity={0.3} 
+                    fill="#ff7300" 
+                  />
+                  <Scatter name="B school" data={scatter02} fill="#347300" />
+                  <ReferenceArea x1={250} x2={300} ifOverflow="extendDomain" label="any label" />
+                  <ReferenceLine x={159} stroke="red"/>
+                  <ReferenceLine y={237.5} stroke="red"/>
+                  <ReferenceDot x={170} y={290} r={15} label="AB" stroke="none" fill="red" isFront/>
+              </ScatterChart>
+            </Toolkit>
+            <div style={{height: '400px', width: '100%', border: '1px solid black', overflowY: 'auto', flexGrow: 1}}>
+              <code>
+                {this.state.scatterPoints ? JSON.stringify(this.state.scatterPoints) : 'Make a selection to view the data here...'}
+              </code>
+            </div>
+          </div>
+        </div>
+        
+        <div className="line-chart-wrapper" style={{flexGrow: 2}}>
+          <p><i>Tooltip and category with yaxis number type</i></p>
           <Toolkit>
 
             <ToolBar 
               displayMode={'visible'}
             >
-              <ReferenceLines />
+              {/* <ReferenceLines /> */}
             </ToolBar>
             <ResponsiveContainer height={400}>
-            <LineChart width={600} height={400} data={data02} syncId="test">
-              <CartesianGrid stroke="#f5f5f5" fill="#e6e6e6" />
-              <XAxis type="number" dataKey="pv" height={40}>
-                <Label value="x" position="insideBottom"/>
-              </XAxis>
-              <YAxis type="number" unit="%" width={80}>
-                <Label value="y" position="insideLeft" angle={90} />
-              </YAxis>
-              <Line
-                key="uv"
-                type="monotone"
-                dataKey="uv"
-                stroke="#ff7300"
-                strokeDasharray="3 3"
-              >
-                <LabelList position="bottom" offset={10} dataKey="name" />
-              </Line>
-            </LineChart>
+            <BarChart data={dataCat} syncId="test">
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name"/>
+              <YAxis /> 
+              <Bar dataKey="pv" fill="#8884d8" />
+              <Bar dataKey="uv" fill="#82ca9d" />
+              
+            </BarChart>
             
             </ResponsiveContainer>
           </Toolkit>
-        </div> */}
-              
-        <div className="line-chart-wrapper">
-          Reference Line: <select>
-            <option>fixed (dataKey)</option>
-            <option>cursor</option>
-            {/* <option>dynamic fn</option> */}
-          </select>
-          <Toolkit>
-            <ToolBar 
-              displayMode={'visible'}
-            >
-              <ZoomSelect />
-              <ZoomIn />
-              <ZoomOut />
-              <Pan />
-              <AutoScale />
-              <TooltipClosest />
-              <TooltipCompare />
-              <BoxSelect onSelected={(points: any) => console.log(points)}/>
-              <LasoSelect onSelected={(points: any) => console.log(points)}/>
-              <ReferenceLines />
-            </ToolBar> 
-            <ScatterChart width={400} height={400} margin={{ top: 20, right: 20, bottom: 0, left: 20 }}> 
-                <XAxis type="number" dataKey="x" name="stature" unit="cm" />
-                <YAxis type="number" dataKey="y" name="weight" unit="kg" /> 
-                <ZAxis type="number" dataKey="z" range={[50, 1200]} name="score" unit="km" />
-                <CartesianGrid />
-                <Scatter 
-                  name="A school" 
-                  data={scatter01} 
-                  type="number"
-                  fillOpacity={0.3} 
-                  fill="#ff7300" 
-                />
-                <Scatter name="B school" data={scatter02} fill="#347300" />
-                <Legend/>
-                <ReferenceArea x1={250} x2={300} ifOverflow="extendDomain" label="any label" />
-                <ReferenceLine x={159} stroke="red"/>
-                <ReferenceLine y={237.5} stroke="red"/>
-                <ReferenceDot x={170} y={290} r={15} label="AB" stroke="none" fill="red" isFront/>
-            </ScatterChart>
-          </Toolkit>
-          <p><i>Yahoo finance earnings graph example</i></p>
         </div>
-        
+
+        <p><b>TODO</b></p>
+        <div className="line-chart-wrapper" style={{flexGrow: 1, maxWidth: 500}}>
+            <p><i>Improved tooltip example</i></p>
+        </div>
+        <div className="line-chart-wrapper" style={{flexGrow: 1, maxWidth: 500}}>
+            <p><i>Draw tool example</i></p>
+        </div>
+        <div className="line-chart-wrapper" style={{flexGrow: 1, maxWidth: 500}}>
+            <p><i>Cross-filter example</i></p>
+        </div>
+        <div className="line-chart-wrapper" style={{flexGrow: 1, maxWidth: 500}}>
+            <p><i>Layered/Stacked graph example ... deferred</i></p>
+        </div>
       </div>  
     );
   }

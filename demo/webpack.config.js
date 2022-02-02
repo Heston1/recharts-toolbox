@@ -1,5 +1,6 @@
 const path = require('path');
 const { LoaderOptionsPlugin } = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -15,6 +16,10 @@ module.exports = {
   plugins: [
     new LoaderOptionsPlugin({
       debug: true
+    }),
+    new HtmlWebpackPlugin({
+      template: 'index.html',
+      inject: false
     })
   ],
   resolve: {

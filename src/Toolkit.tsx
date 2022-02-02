@@ -218,6 +218,7 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                                                 {
                                                     ...graphStatetRef.current, 
                                                     data: parent.props.data,
+                                                    containerRef: containerRef.current,
                                                     graph_uid: toolkit_graph_ref.current,
                                                     yAxisDomain, 
                                                     setYAxisDomain,

@@ -13,7 +13,7 @@
 // import Rectangle from './Rectangle';
 // import Sector from './Sector';
 
-import LineChart from './LineChart';
+// import LineChart from './LineChart';
 // import LineChartSyncId from './LineChartSyncId';
 // import AreaChart from './AreaChart';
 // import BarChart from './BarChart';
@@ -31,9 +31,14 @@ import LineChart from './LineChart';
 // import Trapezoid from './Trapezoid';
 // import BugReproduce from './BugReproduce';
 
+import Demo from './Demo'
+
 export default {
-  chartWrapper: {
-    LineChart,
+  examples: {
+    Demo
+  }
+  // chartWrapper: {
+    // LineChart,
     // LineChartSyncId,
     // AreaChart,
     // BarChart,
@@ -45,7 +50,7 @@ export default {
     // Treemap,
     // Sankey,
     // FunnelChart,
-  },
+  // },
 
   // polar: {
   //   Pie,
