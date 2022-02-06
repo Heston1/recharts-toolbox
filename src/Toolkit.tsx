@@ -2,19 +2,35 @@ import React from 'react';
 import { Customized } from 'recharts';
 import { CustomTooltip } from './general/CustomTooltip';
 import AxisDragUtil from './utils/AxisDragUtil';
-import { formatTimeSeriesTicks, resolveAxis, uid, flatten } from './utils/helpers';
+import { formatTimeSeriesTicks, resolveAxis, uid, flatten, getData, getXAxisKey, getDomainOfDataByKey } from './utils/helpers';
 import SelectionUtil from './utils/SelectionUtil';
 import TooltipUtil from './utils/TooltipUtil';
 // import usePrevious from './utils/usePrevious';
 import { withFading } from './utils/withFading';
 import { withResponsiveContainer } from './utils/withResponsiveContainer';
-import { getDomainOfDataByKey } from './utils/helpers';
 export interface ToolkitProps {
     children: JSX.Element | JSX.Element[] | string;
     width: number;
     height: number;
 }
 export type Props = ToolkitProps;
+
+export enum ActionState {
+    NONE,
+    ZOOMSELECT,
+    ZOOMIN, 
+    ZOOMOUT, 
+    PAN, 
+    LASOSELECT,
+    AUTOSCALE,
+    CAMERA,
+    DRAW
+} 
+
+export enum TooltipState {
+    CLOSEST = 'closest',
+    COMPARE = 'compare'
+}
 
 export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     const toolkit_graph_ref = React.useRef(`toolkit_ref_${uid()}`);
@@ -28,20 +44,16 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     const [toolbarComponents, setToolbarComponents] = React.useState(null);
 
     const [yAxisDomain, setYAxisDomain]: any = React.useState(['auto', 'auto']); 
-    const [xAxisDomain, setXAxisDomain]: any = React.useState(['auto', 'auto']); // 1451865600, 1483056000
-    // const prevXAxisDomain = usePrevious(xAxisDomain);
-    // const prevYAxisDomain = usePrevious(yAxisDomain);
+    const [xAxisDomain, setXAxisDomain]: any = React.useState(['auto', 'auto']); // 1451865600, 1483056000 //0, 5
 
-    const [actionState, setActionState] = React.useState(null); 
-
-    const [selectState, setSelectState] = React.useState(null); //zoom, select, laso
+    const [selectState, setSelectState] = React.useState(ActionState.NONE);
     const [selectCoords, setSelectCoords] = React.useState(null);
 
     const [panState, setPanState] = React.useState(false);
 
     const [hasSet, setHasSet] = React.useState(false) //circular
 
-    const [tooltipMode, setTooltipMode] = React.useState('closest'); //closest, compare
+    const [tooltipMode, setTooltipMode] = React.useState(TooltipState.CLOSEST);
     const [tooltipCoord, setTooltipCoord] = React.useState(null);
 
     const [enableReferenceLines, setEnableReferenceLines] = React.useState(false);
@@ -49,11 +61,11 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     const [ticks, setTicks] = React.useState([])
     const [drawType, setDrawType] = React.useState('polygon')
 
-    
     React.useEffect(() => {
         const setComponents = (child: any) => {
             switch (child.type.name) {
                 case 'CategoricalChartWrapper':
+                    console.log(child)
                     setParent(child);
                     break;
                 case 'ToolBar':
@@ -82,24 +94,9 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     }, [props.children]);
 
 
-    const getXAxisKey = (node: any) => {
-        // const lookup = node.type.displayName == "ScatterChart" ? 'Scatter' : 'XAxis'
-        return node.props.children.filter((n: any) => n.type.name == 'XAxis')[0].props.dataKey;
-    }
-
-    const getData = (node: any) => {
-        if (node.type.displayName == "ScatterChart") {
-            return flatten(node.props.children.filter((n: any) => n.type.name == 'Scatter').map((n: any) => n.props.data));
-        }
-        else {
-            return node.props.data;
-        }
-    }
-
+  
     React.useEffect(() => {
         if (parent && (typeof xAxisDomain[0] == 'string' || typeof xAxisDomain[1] == 'string')) { 
-            // console.log(parent)
-            // console.log(getData(parent))
             const xAxis = getDomainOfDataByKey(getData(parent), getXAxisKey(parent), 'number'); //TODO
       
             let tmp = [], x1 = xAxis[0], x2 = xAxis[1], tickCount = 5;
@@ -137,32 +134,29 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                 return;
             }
 
-            //TODO handle non-integer keys, datetime etc.
-         
-            const xAxisConfig = (child: any) => {
-                
-                if (child.props.type == "time" || child.props.type == "number") {
-                    return {
-                        allowDataOverflow: true, 
-                        domain: xAxisDomain,
-                        scale: 'linear',
-                        type: 'number',
-                        ticks,
-                        interval: 0,
-                        tickFormatter: (tick: any) => {
-                            if (child.props.type == "time") {
-                                const date = new Date(tick.toFixed(0)*1000);
-                                const interval = ((xAxisDomain[1]-xAxisDomain[0])/5);
-                                
-                                return formatTimeSeriesTicks(interval, date);
-                            } else {
-                                return tick
-                            }
-                            
-                        }
+            const xaxiselem = parent.props.children.filter((n: any) => n.type.name == 'XAxis')[0];
+            const xAxisConfig = (child: any) => ({ //convert everything to number even category
+                allowDataOverflow: true, 
+                domain: xAxisDomain,
+                scale: 'linear',
+                type: 'number',
+                ticks: xaxiselem.props.type != 'category' ? ticks : null,
+                interval: xaxiselem.props.type != 'category' ? 0 : 0,
+                tickFormatter: (tick: any) => {
+                    if (child.props.type == "time") {
+                        const date = new Date(tick.toFixed(0)*1000);
+                        const interval = ((xAxisDomain[1]-xAxisDomain[0])/5);
+                        
+                        return formatTimeSeriesTicks(interval, date);
+                    } 
+                    else if (xaxiselem.props.type == 'category') {
+                        return parent.props.data[tick].name
+                    }
+                    else {
+                        return tick
                     }
                 }
-            }
+            })
             if (child.type) {
                 switch (child.type.displayName) {
                     //handle multiple axis
@@ -194,12 +188,23 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
         }
     );
 
+    const convertXAxisToNumber = (data: any) => {
+        if (data && data[0] && typeof data[0].name ==  'string') {
+            const tmp = data.map((point: any, index: any) => ({...point, name: index}))
+            // console.log(tmp)
+            return tmp
+        }
+        
+        return data
+    }
+
     return (
         <div ref={containerRef} style={{position: 'relative'}}>
            
             {parent &&   
-                withFading({
-                    element: <div
+                // withFading({
+                //     element: 
+                            <div
                                 ref={toolbarRef} 
                                 style={{
                                     position: 'absolute', 
@@ -243,10 +248,11 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                                         })
                                     )
                                 }   
-                            </div>,
-                    duration: 0.5,
-                    isOut: false
-                })
+                            </div>
+                            // ,
+                //     duration: 0.5,
+                //     isOut: false
+                // })
             }
 
             {
@@ -256,8 +262,8 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                         {
                             id: toolkit_graph_ref.current,
                             width: props.width || parent.props.width,
-                            height: props.height  || parent.props.height
-                            
+                            height: props.height  || parent.props.height,
+                            data: convertXAxisToNumber(parent.props.data)
                         }, 
                         children()
                     )
@@ -298,7 +304,8 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                             setXAxisDomain(coords)
                         }, 
                         ticks,
-                        setTicks
+                        setTicks,
+                        originalXAxisType: parent.props.children.filter((n: any) => n.type.name == 'XAxis')[0].props.type
                         
                     }}/>
 

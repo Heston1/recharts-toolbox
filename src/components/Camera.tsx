@@ -1,5 +1,5 @@
 import React from 'react';
-import { CameraIcon } from '../Icons/CameraIcon';
+import { CameraIcon } from '../Icons';
 export interface CameraProps {
     width?: number;
     height?: number;

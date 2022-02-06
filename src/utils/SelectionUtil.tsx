@@ -1,13 +1,17 @@
 import React from 'react';
 import { resolveAxis, isInPolygon, uid } from './helpers';
 import { scaleLinear } from 'd3-scale';
+import usePrevious from './usePrevious';
 
 let select_wasMoved = false, maskInterval: any
 const SelectionUtil = (selectionProps: any)  => {
     //TODO handle padding/margin, other offsets
     const props = selectionProps.graphProps;
+    const [originalStart, setOriginalStart] = React.useState(null);
     const [start, setStart] = React.useState(null);
     const [end, setEnd] = React.useState(null);
+    // const previousPoint = usePrevious(end);
+
     const [path, setPath] = React.useState("");
     const [canvasItems, setCanvasItems]: any = React.useState({});
     const [drawContext, setDrawContext] = React.useState(null);
@@ -16,7 +20,9 @@ const SelectionUtil = (selectionProps: any)  => {
     const [vYmap, setVYMAP] = React.useState([]);
     const [vXmap, setVXMAP] = React.useState([]);
 
-    React.useEffect(() => {
+    const normalise = (value: number, max: number, min: number = 0) => (value-min)/(max-min);
+
+    React.useEffect(() => {//TODO use <style />
         if (maskOpacity > 0.3) {
             clearInterval(maskInterval);
             maskInterval = null;
@@ -28,7 +34,11 @@ const SelectionUtil = (selectionProps: any)  => {
         setStart(null); setEnd(null);
         const bbox = e.target.getBoundingClientRect();
         
-        setStart({x: e.clientX - selectionProps.offsetLeft, y: e.clientY - bbox.top + props.yAxisMap[0].y}); 
+        const x = e.clientX - selectionProps.offsetLeft, y =  e.clientY - bbox.top + props.yAxisMap[0].y
+
+        setStart({x, y}); 
+        setOriginalStart({x, y})
+
         //TODO replace with <style />
         maskInterval = setInterval(() => {
             setMaskOpacity(prev => prev+0.01);
@@ -40,16 +50,29 @@ const SelectionUtil = (selectionProps: any)  => {
         if (select_wasMoved) {
             const bbox = e.target.getBoundingClientRect();
 
-            setEnd({x: e.clientX - selectionProps.offsetLeft, y: e.clientY - bbox.top + props.yAxisMap[0].y});
+            const x = e.clientX - selectionProps.offsetLeft;
+            const y = e.clientY - bbox.top + props.yAxisMap[0].y;
+            
+            const directionX = normalise(x - originalStart.x, originalStart.x);
+            const directionY = normalise(y - originalStart.y, originalStart.y);
+
+            if (directionY < 0.075 && directionY > -0.075) {
+                setStart({x: originalStart.x, y: 0})
+                setEnd({x, y: props.yAxisMap[0].height + bbox.top + props.yAxisMap[0].y}) //TODO test
+            } 
+            else if (directionX < 0.075 && directionX > -0.075) {
+                setStart({x: 0, y: originalStart.y})
+                setEnd({x: props.xAxisMap[0].width + props.yAxisMap[0].width + props.yAxisMap[0].x, y})
+            } 
+            else {
+                setStart(originalStart);
+                setEnd({x, y});
+            }
         }
     }
 
     const onMouseUp = (e: any) => {
         setMaskOpacity(0);
-
-        const bbox = e.target.getBoundingClientRect();
-
-        setEnd({x: e.clientX - selectionProps.offsetLeft, y: e.clientY - bbox.top + props.yAxisMap[0].y});
 
         select_wasMoved = false;
 
@@ -61,11 +84,9 @@ const SelectionUtil = (selectionProps: any)  => {
         const y2 = start.y > end.y ? start.y : end.y;
 
         if (selectionProps.mode == "zoom" || selectionProps.mode == null) {
-            
-
             const [yA1, yA2] = resolveAxis(props, selectionProps.yAxisDomain);
             const [xA1, xA2] = resolveAxis(props, selectionProps.xAxisDomain);
-
+           
             selectionProps?.onCoordChange({
                 type: selectionProps.mode,
                 yDomain: [
@@ -271,7 +292,7 @@ const SelectionUtil = (selectionProps: any)  => {
     //TODO multiple selections
     if (selectionProps.mode == "laso") {
         return (
-            <g>
+            <g className='recharts-toolkit-laso-select-layer'>
                 <path
                     d={path}
                     style={{
@@ -307,7 +328,7 @@ const SelectionUtil = (selectionProps: any)  => {
 
     if (selectionProps.mode == "select") {
         return (
-            <g>
+            <g className='recharts-toolkit-box-select-layer'> 
                 {(start && end) && <rect 
                     x={start.x < end.x ? start.x : end.x}
                     y={start.y < end.y ? start.y : end.y}
@@ -337,7 +358,7 @@ const SelectionUtil = (selectionProps: any)  => {
 
     if (selectionProps.mode == "draw") {
         return (
-            <g>
+            <g className='recharts-toolkit-draw-layer'>
                 {
                     Object.keys(canvasItems).map((key: any) => {
                         const item = canvasItems[key];
@@ -419,7 +440,7 @@ const SelectionUtil = (selectionProps: any)  => {
 
     if (selectionProps.mode == "zoom" || selectionProps.mode == null) {
         return (
-            <g>
+            <g className='recharts-toolkit-zoom-layer'>
                 <mask id="selection_mask">
                     
                     <rect 

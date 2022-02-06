@@ -27,6 +27,15 @@ const scatter02 = [
   { x: 210, y: 220, z: 230 },
 ];
 
+
+const exampleLineData = [
+  { name: 'A', uv: 245, pv: 350, },
+  { name: 'B', uv: 480, pv: 300, },
+  { name: 'C', uv: 145, pv: 300, },
+  { name: 'D', uv: 900, pv: 200, },
+  { name: 'E', uv: 375, pv: 240, },
+  { name: 'F', uv: 500, pv: 200,},
+]
 // const randdist = Array.from(Array(100).keys()).map((x: number) => {
 //   const rand = (min: number, max: number) =>  parseFloat((Math.random() * ((max) - (min) + 1) + (min)).toFixed(2));
 //     return {
@@ -366,23 +375,113 @@ export default class Demo extends Component<any, any> {
   render() {
     return (
       <div className="line-charts"  style={{margin: '0 15%'}}>
-        <h2 style={{color: 'red', marginBottom: '20px', marginTop: '50px'}}><b>**This library is still under development 0.x and should not be used for production, the API could change and it is not recommended for use at this current moment in time.**</b></h2>
-        <hr/>
-        <div>
-          <h1>Recharts-toolkit</h1>
-          <p>Recharts wrapper for interactive visualisations</p>
+        {/* <h2 style={{color: 'red', marginBottom: '20px', marginTop: '50px'}}><b>**This library is still under development 0.x and should not be used for production, the API could change and it is not recommended for use at this current moment in time.**</b></h2> */}
+        {/* <hr/> */}
+        <div style={{textAlign: 'center'}}>
+          <h1 style={{margin: 0}}>Recharts-toolkit</h1>
+          <p  style={{margin: 0, marginBottom: 20}}>Recharts wrapper for interactive visualisations</p>
+          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row'}}>
+            <div style={{marginRight: '10px'}}>
+              <Toolkit>
+                  <ToolBar>
+                      <ZoomIn />
+                      <ZoomOut />
+                      <ZoomSelect />
+                  </ToolBar>
 
+                  <LineChart
+                      width={500}
+                      height={300}
+                      data={exampleLineData}
+                      margin={{left: -25}}
+                  >
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
+                      <Line type="monotone" dataKey="uv" stroke="#8884d8" />
+                      <Line type="monotone" dataKey="pv" stroke="#82ca9d" />
+                  </LineChart>
+              </Toolkit>
+            </div>
+            <div style={{
+              display: 'flex', 
+              flexDirection: 'column', 
+              width: 500,
+              height: '100%',
+              textAlign: 'left'
+            }}>
+              <pre className="prettyprint">
+                <code className="language-js">
+                    {`
+<Toolkit>
+  <ToolBar>
+      <ZoomIn />
+      <ZoomOut />
+      <ZoomSelect />
+  </ToolBar>
+
+  <LineChart
+      width={500}
+      height={300}
+      data={data}
+  >
+      <XAxis dataKey="name" />
+      <YAxis />
+      <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
+      <Line type="monotone" dataKey="uv" stroke="#8884d8" />
+      <Line type="monotone" dataKey="pv" stroke="#82ca9d" />
+  </LineChart>
+</Toolkit>
+                `}
+                </code>
+              </pre>
+            </div>
+          </div>
+          
         </div>
         <hr/>
         <div>
           <h3>Installation</h3>
+          <h4>NPM</h4>
+          <pre className="prettyprint">
+              <code className="language-sh">
+                {`
+# latest stable
+$ npm install recharts recharts-toolkit
+# or using yarn
+$ yarn add recharts recharts-toolkit 
+                `}
+              </code>
+          </pre>
+          <h4>UMD</h4>
+          <pre className="prettyprint">
+              <code className="language-html">
+                {`
+<script src="https://unpkg.com/react/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
+<script src="https://unpkg.com/recharts-toolkit/umd/RechartsToolkit.js"></script>
+                `}
+              </code>
+          </pre>
+          <h4>Dev build</h4>
+          <pre className="prettyprint">
+              <code className="language-sh">
+                {`
+$ git clone https://github.com/Heston1/recharts-toolkit.git
+$ cd recharts-toolkit
+$ npm install # or yarn
+$ npm run build  #or yarn build
+                `}
+              </code>
+          </pre>
         </div>
         <hr/>
+        
         <div>
           <h3>Examples</h3>
         </div>
         <div className="line-chart-wrapper">
-          <p><i>Zoom, pan and timeseries graph example</i></p>
           <ul>
             <li>Drag the x or y axis to pan, dragging the edges of the axis will logarithmically scale</li>
             <li>You can also drag the edges of the graph to scale by both the x and y axis e.g. hover your cursor just below the x and y axis (origin)</li>
@@ -476,12 +575,12 @@ export default class Demo extends Component<any, any> {
                 fixed="price" //TODO dataKey, cursor, dynamic
               /> 
              
-              <Export 
+              {/* <Export 
                 type="csv"
                 header={[]} //override axis name/label
                 beforeDownload={(e: any) => {}} //modify here before downloading
                 onDownload={(e: any) => {}} //do what you want with the csv file
-              />
+              /> */}
 
               
               <DrawTool 
@@ -549,7 +648,8 @@ export default class Demo extends Component<any, any> {
                         bollinger: [
                           EXPMA && EXPMA + (Math.sqrt(u2)*2), //upper band
                           EXPMA && EXPMA - (Math.sqrt(u2)*2) //lower band
-                        ]
+                        ],
+                        volume: 100
                       }
                     })
                 }
@@ -572,17 +672,18 @@ export default class Demo extends Component<any, any> {
                   <Line name="MA (20, C, EMA, 0)" dataKey="middleband" stroke="orange" dot={false} connectNulls />
                   {/* period, field, standard deviations, type */}
                   <Area name="BOLLINGER BANDS (20, C, 2, EMA)" dataKey="bollinger" stroke="orange" strokeWidth={1} connectNulls  fill="orange" fillOpacity={0.1} />
+                  {/* <Bar dataKey="volume" fill="#8884d8" /> */}
                 </ComposedChart>
             </ResponsiveContainer>
           </Toolkit>
         </div>
 
         <div className="line-chart-wrapper">
-          <p><i>Selection example with scatter graph</i></p>
           <ul>
             <li>Utilise the select laso (<Icons.LasoSelectIcon width="13" height="13"/>) and box select (<Icons.BoxSelectIcon width="13" height="13"/>) tools to select data from the graph
             </li>
             {/* <li>Hold <code>Shift</code> while clicking to make multiple selections</li> */}
+            <li><button onClick={(e: any) => this.setState({scatterPoints: null})}>Clear selection box</button></li>
           </ul>
           <div style={{display: 'flex'}}>
             <Toolkit>
@@ -619,7 +720,7 @@ export default class Demo extends Component<any, any> {
                   <ReferenceDot x={170} y={290} r={15} label="AB" stroke="none" fill="red" isFront/>
               </ScatterChart>
             </Toolkit>
-            <div style={{height: '400px', width: '100%', border: '1px solid black', overflowY: 'auto', flexGrow: 1}}>
+            <div style={{height: '350px', width: '100%', border: '1px solid black', overflowY: 'auto', flexGrow: 1, margin: 20}}>
               <code>
                 {this.state.scatterPoints ? JSON.stringify(this.state.scatterPoints) : 'Make a selection to view the data here...'}
               </code>
@@ -628,7 +729,6 @@ export default class Demo extends Component<any, any> {
         </div>
         
         <div className="line-chart-wrapper" style={{flexGrow: 2}}>
-          <p><i>Tooltip and category with yaxis number type</i></p>
           <Toolkit>
 
             <ToolBar 
@@ -650,7 +750,7 @@ export default class Demo extends Component<any, any> {
           </Toolkit>
         </div>
 
-        <p><b>TODO</b></p>
+        {/* <p><b>TODO</b></p>
         <div className="line-chart-wrapper" style={{flexGrow: 1, maxWidth: 500}}>
             <p><i>Improved tooltip example</i></p>
         </div>
@@ -663,7 +763,13 @@ export default class Demo extends Component<any, any> {
         <div className="line-chart-wrapper" style={{flexGrow: 1, maxWidth: 500}}>
             <p><i>Layered/Stacked graph example ... deferred</i></p>
         </div>
+        <hr/>
+        <div>
+          <h3>API</h3>
+        </div> */}
+        
       </div>  
+      
     );
   }
 }

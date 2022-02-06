@@ -1,4 +1,5 @@
 import React from 'react';
+import { BoxSelectIcon } from '../Icons';
 import usePrevious from '../utils/usePrevious';
 
 export const BoxSelect  = (props: any) => {
@@ -12,9 +13,5 @@ export const BoxSelect  = (props: any) => {
         }
     }, [selectCoords])
 
-    return (
-        <svg onClick={(e: any) => {setSelectState('select')}} xmlns="http://www.w3.org/2000/svg" width="18" height="18" stroke="rgb(102, 102, 102)" viewBox="0 0 16 16">
-            <rect fill="none" strokeWidth={4} strokeDasharray={"2,2"} x={0} y={0} width={16} height={16}/>
-        </svg>
-    );
+    return <BoxSelectIcon onClick={(e: any) => {setSelectState('select')}}/>;
 }
