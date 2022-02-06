@@ -43,7 +43,7 @@ const TooltipUtil = (tooltipProps: any)  => {
         
         let minDist: number = Infinity;
         let index: any
-        points.forEach((point: any, _index: number) => {
+        points && points.forEach((point: any, _index: number) => {
             const dist = Math.sqrt((relX-point.x)**2) 
                 + Math.sqrt((relY-point.y)**2);
             if (dist < minDist) {

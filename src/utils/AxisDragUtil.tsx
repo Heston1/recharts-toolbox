@@ -80,7 +80,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
             const cursorPosX = originX - ev.pageX;
             
             const [yA1, yA2] = resolveAxis(props, targetY); 
-            const [xA1, xA2] = resolveAxis(props, targetX); 
+            const [xA1, xA2] = resolveAxis(props, targetX, axisDragProps.originalXAxisType); 
             
             const tickSizeY = (yA2-yA1)/props.yAxisMap[0].height;
             const tickSizeX = (xA2-xA1)/props.xAxisMap[0].width;
@@ -88,19 +88,17 @@ const AxisDragUtil = (axisDragProps: any)  => {
             const distanceX = cursorPosX*tickSizeX  * -1;
             const log = Math.log(5);
 
-            const round = (domain: Array<number>): Array<number> => [parseFloat(domain[0].toFixed(0)), parseFloat(domain[1].toFixed(0))]
+            // const round = (domain: Array<number>): Array<number> => [parseFloat(domain[0].toFixed(0)), parseFloat(domain[1].toFixed(0))]
 
             if (key == 'pan'){  
                 const domainY = [yA1 - distanceY, yA2 - distanceY];
                 const domainX = [xA1 - distanceX, xA2 - distanceX];
 
                 axisDragProps?.onCoordYChange(domainY);
-
-                if (props.xAxisMap[0].type != 'category') {
-                    axisDragProps?.onCoordXChange(domainX);
+                axisDragProps?.onCoordXChange(domainX);
+                if (axisDragProps.originalXAxisType != 'category') {
                     calculateTimeSeriesTicks(5, targetX, domainX, axisDragProps.setTicks);
                 }
-
                 return;
             }
 
@@ -109,11 +107,10 @@ const AxisDragUtil = (axisDragProps: any)  => {
                 const domainX = [xA1 - (distanceX * log), xA2];
 
                 axisDragProps?.onCoordYChange(domainY);
-                if (props.xAxisMap[0].type != 'category') {
-                    axisDragProps?.onCoordXChange(domainX);
+                axisDragProps?.onCoordXChange(domainX);
+                if (axisDragProps.originalXAxisType != 'category') {
                     calculateTimeSeriesTicks(5, targetX, domainX, axisDragProps.setTicks);
                 }
-                
                 return;
             }
             if (key == 'xy-end') {
@@ -121,11 +118,10 @@ const AxisDragUtil = (axisDragProps: any)  => {
                 const domainX = [xA1 , xA2 - (distanceX * log)];
 
                 axisDragProps?.onCoordYChange(domainY);
-                if (props.xAxisMap[0].type != 'category') {
-                    axisDragProps?.onCoordXChange(domainX);
+                axisDragProps?.onCoordXChange(domainX);
+                if (axisDragProps.originalXAxisType != 'category') {
                     calculateTimeSeriesTicks(5, targetX, domainX, axisDragProps.setTicks);
                 }
-
                 return;
             }
             if (key == 'y-end') {
@@ -133,12 +129,10 @@ const AxisDragUtil = (axisDragProps: any)  => {
                 const domainX = [xA1 - (distanceX * log), xA2];
 
                 axisDragProps?.onCoordYChange(domainY);
-
-                if (props.xAxisMap[0].type != 'category') {
-                    axisDragProps?.onCoordXChange(domainX);
+                axisDragProps?.onCoordXChange(domainX);
+                if (axisDragProps.originalXAxisType != 'category') {
                     calculateTimeSeriesTicks(5, targetX, domainX, axisDragProps.setTicks);
                 }
-
                 return;
             }
             if (key == 'x-end') {
@@ -146,11 +140,10 @@ const AxisDragUtil = (axisDragProps: any)  => {
                 const domainX = [xA1 , xA2 - (distanceX * log)];
 
                 axisDragProps?.onCoordYChange(domainY);
-                if (props.xAxisMap[0].type != 'category') {
-                    axisDragProps?.onCoordXChange(domainX);
+                axisDragProps?.onCoordXChange(domainX);
+                if (axisDragProps.originalXAxisType != 'category') {
                     calculateTimeSeriesTicks(5, targetX, domainX, axisDragProps.setTicks);
                 }
-                
                 return;
             }
             
@@ -186,8 +179,9 @@ const AxisDragUtil = (axisDragProps: any)  => {
             }
 
             if (key == 'x') {
-                if (props.xAxisMap[0].type != 'category') {
-                    axisDragProps?.onCoordXChange(domain);
+                axisDragProps?.onCoordXChange(domain);
+
+                if (axisDragProps.originalXAxisType != 'category') {
                     calculateTimeSeriesTicks(5, targetX, domain, axisDragProps.setTicks);
                 }
             } 
@@ -215,30 +209,26 @@ const AxisDragUtil = (axisDragProps: any)  => {
     }
 
     return (
-        <g>
+        <g className='recharts-toolkit-drag-layer'>
             {/* x axis */}
-            {props.xAxisMap[0].type != 'category' &&
-                 <rect 
-                    onMouseDown={(e: any) => dragHandle(e, 'x')}
-                    x={props.xAxisMap[0].x} 
-                    y={props.xAxisMap[0].y} 
-                    width={props.xAxisMap[0].width} 
-                    height={props.height-props.xAxisMap[0].y} 
-                    style={{opacity: 0, cursor: 'e-resize'}}
-                />
-            }
-            
+            <rect 
+                onMouseDown={(e: any) => dragHandle(e, 'x')}
+                x={props.xAxisMap[0].x} 
+                y={props.xAxisMap[0].y} 
+                width={props.xAxisMap[0].width} 
+                height={props.height-props.xAxisMap[0].y} 
+                style={{opacity: 0, cursor: 'e-resize'}}
+            />
+         
             {/* origin */}
-            {props.xAxisMap[0].type != 'category' &&
-                <rect 
-                    onMouseDown={(e: any) => dragHandle(e, 'xy')}
-                    x={props.yAxisMap[0].x} 
-                        y={props.xAxisMap[0].y} 
-                    width={props.yAxisMap[0].width} 
-                    height={props.height-props.xAxisMap[0].y} 
-                    style={{opacity: 0, cursor: 'ne-resize'}}
-                />
-            }
+            <rect 
+                onMouseDown={(e: any) => dragHandle(e, 'xy')}
+                x={props.yAxisMap[0].x} 
+                    y={props.xAxisMap[0].y} 
+                width={props.yAxisMap[0].width} 
+                height={props.height-props.xAxisMap[0].y} 
+                style={{opacity: 0, cursor: 'ne-resize'}}
+            />
 
             {/* y axis */}
             <rect 
@@ -251,40 +241,34 @@ const AxisDragUtil = (axisDragProps: any)  => {
             />
 
             {/* xy */}
-            {props.xAxisMap[0].type != 'category' &&
-                <rect 
-                    onMouseDown={(e: any) => dragHandle(e, 'xy-end')}
-                    x={props.xAxisMap[0].width + props.xAxisMap[0].x} 
-                    y={0} 
-                    width={props.width - props.yAxisMap[0].width + props.yAxisMap[0].x} 
-                    height={props.yAxisMap[0].y} 
-                    style={{opacity: 0, cursor: 'sw-resize'}}
-                />
-            }   
+            <rect 
+                onMouseDown={(e: any) => dragHandle(e, 'xy-end')}
+                x={props.xAxisMap[0].width + props.xAxisMap[0].x} 
+                y={0} 
+                width={props.width - props.yAxisMap[0].width + props.yAxisMap[0].x} 
+                height={props.yAxisMap[0].y} 
+                style={{opacity: 0, cursor: 'sw-resize'}}
+            />
 
             {/* y end */}
-            {props.xAxisMap[0].type != 'category' &&
-                <rect 
-                    onMouseDown={(e: any) => dragHandle(e, 'y-end')}
-                    x={props.yAxisMap[0].x} 
-                    y={0} 
-                    width={props.yAxisMap[0].width} 
-                    height={props.yAxisMap[0].y} 
-                    style={{opacity: 0, cursor: 'se-resize'}}
-                />
-            }
+            <rect 
+                onMouseDown={(e: any) => dragHandle(e, 'y-end')}
+                x={props.yAxisMap[0].x} 
+                y={0} 
+                width={props.yAxisMap[0].width} 
+                height={props.yAxisMap[0].y} 
+                style={{opacity: 0, cursor: 'se-resize'}}
+            />
 
             {/* x end */}
-            {props.xAxisMap[0].type != 'category' &&
-                <rect 
-                    onMouseDown={(e: any) => dragHandle(e, 'x-end')}
-                    x={props.xAxisMap[0].width + props.xAxisMap[0].x} 
-                    y={props.xAxisMap[0].y} 
-                    width={props.width - (props.yAxisMap[0].x + props.xAxisMap[0].width)} 
-                    height={props.height - props.xAxisMap[0].y} 
-                    style={{opacity: 0, cursor: 'nw-resize'}}
-                />
-            }
+            <rect 
+                onMouseDown={(e: any) => dragHandle(e, 'x-end')}
+                x={props.xAxisMap[0].width + props.xAxisMap[0].x} 
+                y={props.xAxisMap[0].y} 
+                width={props.width - (props.yAxisMap[0].x + props.xAxisMap[0].width)} 
+                height={props.height - props.xAxisMap[0].y} 
+                style={{opacity: 0, cursor: 'nw-resize'}}
+            />
         </g>
     )
 }

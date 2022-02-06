@@ -1,4 +1,19 @@
 
+export const getXAxisKey = (node: any) => {
+    // const lookup = node.type.displayName == "ScatterChart" ? 'Scatter' : 'XAxis'
+    return node.props.children.filter((n: any) => n.type.name == 'XAxis')[0].props.dataKey;
+}
+
+export const getData = (node: any) => {
+    if (node.type.displayName == "ScatterChart") {
+        return flatten(node.props.children.filter((n: any) => n.type.name == 'Scatter').map((n: any) => n.props.data));
+    }
+    else {
+        return node.props.data;
+    }
+}
+
+
 /**
  * 
  * @param arr 
@@ -12,11 +27,22 @@ export const flatten = (arr:any) => [].concat(...arr);
  * @param axisDomain 
  * @returns 
  */
-export const resolveAxis = (customizedProps: any, axisDomain: any) => {
+export const resolveAxis = (
+    customizedProps: any, //should be data
+    axisDomain: any, 
+    type: string = 'number', 
+    filterNulls: boolean = true
+) => {
     //TODO if category just get first and last
     //TODO /src/util/ChartUtils.ts:getDomainOfDataByKey 
     let resolvedDomain: any = [axisDomain[0], axisDomain[1]];
-    
+
+    if (type == 'category' && (axisDomain[0] == 'auto' || axisDomain[1] == 'auto' || isNaN(axisDomain[1]) || isNaN(axisDomain[0]))) {
+        const testPoint = customizedProps.formattedGraphicalItems[0]
+        const items = testPoint.props.points || testPoint.props.data;
+        return [0, items.length];
+    }
+
     if (axisDomain[0] == 'auto' || axisDomain[1] == 'auto') {    
         const points: Array<any> = customizedProps.formattedGraphicalItems
             .reduce((acc: any, items: any) => {
@@ -27,18 +53,18 @@ export const resolveAxis = (customizedProps: any, axisDomain: any) => {
                         return acc.concat(flatten(data.map((point: any) => point.value || point.y)))
                     }
                 }
-                // console.log(items)
+                
                 if (items.props.hasOwnProperty("points")) {
-                    // console.log("here")
                     return getValues(items.props.points)
                 } else if (items.props.hasOwnProperty("data")) {
-                    // console.log("here1")
                     return getValues(items.props.data)
                 }
                 
             }, [])
-            .filter((value: any) => !isNaN(value) && !isNaN(value) && value != null && value != null);
-    
+            .filter((value: any) => filterNulls && (!isNaN(value) && !isNaN(value) && value != null && value != null));
+        
+       
+
         if (axisDomain[0] == 'auto') {
             resolvedDomain[0] = Math.min(...points);
         } 
