@@ -1,6 +1,6 @@
 {
   "name": "recharts-toolkit",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "Interactive graphing tools for recharts",
   "main": "lib/index.js",
   "module": "es6/index",
@@ -43,7 +43,9 @@
   "peerDependencies": {
     "react": "^16.0.0 || ^17.0.0",
     "react-dom": "^16.0.0 || ^17.0.0",
-    "recharts": "^2.1.8"
+    "recharts": "^2.1.8",
+    "d3-scale": "^4.0.2",
+    "@types/d3-scale": "^3.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
@@ -111,15 +113,14 @@
     "webpack": "^5.0.0",
     "webpack-bundle-analyzer": "^4.4.0",
     "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^3.11.0"
-  },
-  "dependencies": {
-    "@types/d3-interpolate": "^2.0.0",
+    "webpack-dev-server": "^3.11.0",
+
     "@types/d3-scale": "^3.0.0",
+    "d3-scale": "^3.0.0",
+    "@types/d3-interpolate": "^2.0.0",
     "@types/d3-shape": "^3.0.2",
     "classnames": "^2.2.5",
     "d3-interpolate": "^2.0.0",
-    "d3-scale": "^3.0.0",
     "d3-shape": "^2.0.0",
     "eventemitter3": "^4.0.1",
     "lodash": "^4.17.19",
@@ -128,5 +129,7 @@
     "react-smooth": "^2.0.0",
     "recharts-scale": "^0.4.4",
     "reduce-css-calc": "^2.1.8"
+  },
+  "dependencies": {
   }
 }
