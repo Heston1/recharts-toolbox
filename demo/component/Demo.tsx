@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { ResponsiveContainer, LineChart, ComposedChart , 
   Area, Line, Legend, XAxis, YAxis, CartesianGrid, ReferenceLine,
-    Label, LabelList, Brush, ScatterChart, ZAxis, Scatter, Polygon, Rectangle, Customized, ReferenceArea, ReferenceDot, BarChart, Bar } from 'recharts';
+    Label, LabelList, Brush, ScatterChart, ZAxis, Scatter, Polygon, Rectangle, Customized, ReferenceArea, ReferenceDot, BarChart, Bar, Cell } from 'recharts';
 import { Toolkit, ZoomSelect, ZoomIn, ZoomOut, Pan, AutoScale, Reset, Camera, 
   ToolBar, TooltipClosest, TooltipCompare, BoxSelect, LasoSelect,
    DrawTool, Export, ReferenceLines, Ruler, Icons } from 'recharts-toolkit';
@@ -353,7 +353,10 @@ const initialState = {
   data: data03,
   date: 1,
   price: 115.82,
-  isrealtime: false
+  isrealtime: false,
+  toggleClose: false, 
+  toggleBB20: false,
+  toggleMA20: false,
 };
 let realTimeSim: any, LASTMA: number;
 export default class Demo extends Component<any, any> {
@@ -371,152 +374,69 @@ export default class Demo extends Component<any, any> {
       anotherState: !this.state.anotherState,
     });
   };
-
+  
   render() {
+    const colors = ['#8884d8', 'red'];
+    console.log(this.state.toggleClose)
     return (
       <div className="line-charts"  style={{margin: '0 15%'}}>
-        {/* <h2 style={{color: 'red', marginBottom: '20px', marginTop: '50px'}}><b>**This library is still under development 0.x and should not be used for production, the API could change and it is not recommended for use at this current moment in time.**</b></h2> */}
-        {/* <hr/> */}
+        <h2 style={{color: 'red', marginBottom: '20px', marginTop: '50px'}}><b>**This library is still under development 0.x and should not be used for production, the API could change and it is not recommended for use at this current moment in time.**</b></h2>
+        <hr/>
         <div style={{textAlign: 'center'}}>
           <h1 style={{margin: 0}}>Recharts-toolkit</h1>
           <p  style={{margin: 0, marginBottom: 20}}>Recharts wrapper for interactive visualisations</p>
-          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row'}}>
-            <div style={{marginRight: '10px'}}>
-              <Toolkit>
-                  <ToolBar>
-                      <ZoomIn />
-                      <ZoomOut />
-                      <ZoomSelect />
-                  </ToolBar>
-
-                  <LineChart
-                      width={500}
-                      height={300}
-                      data={exampleLineData}
-                      margin={{left: -25}}
-                  >
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
-                      <Line type="monotone" dataKey="uv" stroke="#8884d8" />
-                      <Line type="monotone" dataKey="pv" stroke="#82ca9d" />
-                  </LineChart>
-              </Toolkit>
-            </div>
-            <div style={{
-              display: 'flex', 
-              flexDirection: 'column', 
-              width: 500,
-              height: '100%',
-              textAlign: 'left'
-            }}>
-              <pre className="prettyprint">
-                <code className="language-js">
-                    {`
-<Toolkit>
-  <ToolBar>
-      <ZoomIn />
-      <ZoomOut />
-      <ZoomSelect />
-  </ToolBar>
-
-  <LineChart
-      width={500}
-      height={300}
-      data={data}
-  >
-      <XAxis dataKey="name" />
-      <YAxis />
-      <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
-      <Line type="monotone" dataKey="uv" stroke="#8884d8" />
-      <Line type="monotone" dataKey="pv" stroke="#82ca9d" />
-  </LineChart>
-</Toolkit>
-                `}
-                </code>
-              </pre>
-            </div>
-          </div>
+          <a href="https://www.npmjs.com/package/recharts-toolkit" target="_blank">npmjs.com/package/recharts-toolkit</a> /  <a href="https://github.com/Heston1/recharts-toolkit" target="_blank">github.com/Heston1/recharts-toolkit</a>
+           
           
-        </div>
-        <hr/>
-        <div>
-          <h3>Installation</h3>
-          <h4>NPM</h4>
-          <pre className="prettyprint">
-              <code className="language-sh">
-                {`
-# latest stable
-$ npm install recharts recharts-toolkit
-# or using yarn
-$ yarn add recharts recharts-toolkit 
-                `}
-              </code>
-          </pre>
-          <h4>UMD</h4>
-          <pre className="prettyprint">
-              <code className="language-html">
-                {`
-<script src="https://unpkg.com/react/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
-<script src="https://unpkg.com/recharts-toolkit/umd/RechartsToolkit.js"></script>
-                `}
-              </code>
-          </pre>
-          <h4>Dev build</h4>
-          <pre className="prettyprint">
-              <code className="language-sh">
-                {`
-$ git clone https://github.com/Heston1/recharts-toolkit.git
-$ cd recharts-toolkit
-$ npm install # or yarn
-$ npm run build  #or yarn build
-                `}
-              </code>
-          </pre>
-        </div>
-        <hr/>
-        
-        <div>
-          <h3>Examples</h3>
-        </div>
-        <div className="line-chart-wrapper">
-          <ul>
-            <li>Drag the x or y axis to pan, dragging the edges of the axis will logarithmically scale</li>
-            <li>You can also drag the edges of the graph to scale by both the x and y axis e.g. hover your cursor just below the x and y axis (origin)</li>
-            {/* <li>Use the middle mouse button (scroll wheel) to scale horizontally</li> */}
-            <li>
-              You can also use the pan tool (<Icons.PanIcon width="13" height="13"/>) and zoom tools (<Icons.ZoomSelectIcon width="13" height="13"/>/<Icons.ZoomInIcon width="13" height="13"/>/<Icons.ZoomOutIcon width="13" height="13"/>) on the toolbar
-            </li>
-            <li>
-              Press the start button to add data every <input type="text" value="3" style={{width: '30px', textAlign: 'right'}} /> seconds:  <button onClick={e => {
-                this.setState({isrealtime: !this.state.isrealtime}, () => {
-                  if (this.state.isrealtime) {
-                    realTimeSim = setInterval(() => {
-                      if (this.state.date == 512) {
-                        clearInterval(realTimeSim);
-                        realTimeSim = null;
-                        return;
-                      }
-                      const date = this.state.date + 1;
-                      const lastentry = this.state.data[this.state.data.length-1].price;
-                      const price = parseFloat((Math.random() * ((lastentry + 3) - (lastentry - 3) + 1) + (lastentry - 3)).toFixed(2));
-                      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                      //you may see missing points because its dividing by 30 and not alternating by month
-                      const data = this.state.data.concat([{ date: `${months[parseInt('' + (date/30))]} ${date%30} 2017`, price}])
-                      this.setState({ date,price,data});
-                    }, 3000);
-                  } else {
-                    clearInterval(realTimeSim);
-                    realTimeSim = null;
-                  }
-                });
-                }}>{this.state.isrealtime ? 'stop' : 'start'}</button>
-            </li>
-          </ul>
-         
 
+          <div className="line-chart-wrapper" style={{position: 'relative'}}>
+            <div style={{textAlign: 'left', position: 'absolute', left: 90, top: 25, zIndex: 10}}>
+              <button 
+                style={{
+                  border: 'none', 
+                  background: 'white', 
+                  boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px', 
+                  borderLeft: '10px solid #0f69ff', 
+                  borderRadius: '5px',
+                  padding: '5px',
+                  marginRight: '15px',
+                  cursor: 'pointer'
+                }}
+                onClick={e => this.setState((prev: any) => ({toggleClose: !prev.toggleClose}))}
+              >
+                CLOSE {this.state.data[this.state.data.length-1].price}
+              </button>
+              <button
+                style={{
+                  border: 'none', 
+                  background: 'white', 
+                  boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px', 
+                  borderLeft: '10px solid orange', 
+                  borderRadius: '5px',
+                  padding: '5px',
+                  marginRight: '15px',
+                  cursor: 'pointer'
+                }}
+                onClick={e => this.setState(prev => ({toggleBB20: !prev.toggleBB20}))}
+              >
+                BOLLINGER BANDS (20, C, 2, EMA)
+              </button>
+              <button
+                style={{
+                  border: 'none', 
+                  background: 'white', 
+                  boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px', 
+                  borderLeft: '10px solid #7e1fff', 
+                  borderRadius: '5px',
+                  padding: '5px',
+                  marginRight: '15px',
+                  cursor: 'pointer'
+                }}
+                onClick={e => this.setState(prev => ({toggleMA20: !prev.toggleMA20}))}
+              >
+                MA (20, C, MA, 0)
+              </button>
+            </div>
           <Toolkit
             //TODO use components outside of here
           >
@@ -524,13 +444,13 @@ $ npm run build  #or yarn build
             <ToolBar 
               displayMode='visible' //TODO
             >
-              <Camera
+              {/* <Camera
                 onCapture={(e: any) => {
                   // e.preventDefault() TODO
                 }}
                 //icon
                 //is toggled
-              />
+              /> */}
 
               <ZoomSelect 
                 scale="log" 
@@ -639,7 +559,7 @@ $ npm run build  #or yarn build
                             .map((x:any) => (x.price-u)**2)
                             .reduce((acc:number, p: number) =>acc+p,0)/P
                       }  
-                      
+
                       return {
                         date: new Date(point.date).getTime()/1000, 
                         price: point.price,
@@ -649,43 +569,90 @@ $ npm run build  #or yarn build
                           EXPMA && EXPMA + (Math.sqrt(u2)*2), //upper band
                           EXPMA && EXPMA - (Math.sqrt(u2)*2) //lower band
                         ],
-                        volume: 100
+                        volume: (point.price/100)*100
                       }
                     })
                 }
-                margin={{ top: 40, right: 40, bottom: 20, left: 20 }}
+                margin={{ top: 20, right: 40, bottom: 20, left: 20 }}
               >
                   <CartesianGrid strokeDasharray="3 3" />
-                  {/* TODO override types? */}
                   {/*  @ts-ignore */}
-                  <XAxis dataKey="date" type="time">
+                  <XAxis dataKey="date" type="time" xAxisId={0}>
                     <Label value="Date" position="insideBottom" />
                   </XAxis>
-                  <YAxis >
+                  {/*  @ts-ignore */}
+                  {/* <XAxis dataKey="date" type="time" xAxisId={1}/> */}
+                  <YAxis allowDecimals={false} yAxisId={0}>
                     <Label value="Stock Price" position="insideLeft" angle={90} />
                   </YAxis>
-                  {/* <Legend iconType="plainline" align="left" verticalAlign="top" margin={{ top: 0, left: 200, right: 0, bottom: 0 }}/> */}
-                  <YAxis  label="test" orientation="right"/>
-                  <Line name="CLOSE" dataKey="price" stroke="#0f69ff" dot={false} connectNulls />
-                  {/* period, field, type, offset */}
-                  <Line name="MA (20, C, MA, 0)" dataKey="ma" stroke="#7e1fff" dot={false} connectNulls />
-                  <Line name="MA (20, C, EMA, 0)" dataKey="middleband" stroke="orange" dot={false} connectNulls />
-                  {/* period, field, standard deviations, type */}
-                  <Area name="BOLLINGER BANDS (20, C, 2, EMA)" dataKey="bollinger" stroke="orange" strokeWidth={1} connectNulls  fill="orange" fillOpacity={0.1} />
-                  {/* <Bar dataKey="volume" fill="#8884d8" /> */}
+                  <YAxis dataKey="volume" label="test" orientation="right" yAxisId={1}  unit='%' hide={true} domain={[0, 750]} />
+                  <Line name="CLOSE" dataKey="price" stroke="#0f69ff" dot={false} connectNulls hide={this.state.toggleClose}/>
+                  <Line name="MA (20, C, MA, 0)" dataKey="ma" stroke="#7e1fff" dot={false} connectNulls hide={this.state.toggleMA20}/>
+                  <Line name="MA (20, C, EMA, 0)" dataKey="middleband" stroke="orange" dot={false} connectNulls hide={this.state.toggleBB20}/>
+                  <Area name="BOLLINGER BANDS (20, C, 2, EMA)" dataKey="bollinger" 
+                    stroke="orange" strokeWidth={1} connectNulls  fill="orange" fillOpacity={0.1} hide={this.state.toggleBB20} />
+                  {/* TODO another x axis for daily interval */}
+                  {/* <Bar dataKey={'volume'} fill="#8884d8" yAxisId={1} isAnimationActive={false} animationDuration={0}>
+                    {this.state.data.map((entry, index) => { return (
+                      <Cell key={`cell-${index}`} fill={colors[entry.price < 90 ? 1 : 0]} opacity={0.8}/>
+                    )})}
+                  </Bar> */}
                 </ComposedChart>
             </ResponsiveContainer>
           </Toolkit>
         </div>
-
+          
+          
+        </div>
+        <p><i>basic yahoo finance clone with recharts made easy!</i></p>
+        <hr/>
+        <div>
+          <h3>Installation</h3>
+          <h4>NPM</h4>
+          <pre className="prettyprint">
+              <code className="language-sh">
+                {`
+# latest stable
+$ npm install recharts recharts-toolkit
+# or using yarn
+$ yarn add recharts recharts-toolkit 
+                `}
+              </code>
+          </pre>
+          <h4>UMD</h4>
+          <pre className="prettyprint">
+              <code className="language-html">
+                {`
+<script src="https://unpkg.com/react/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
+<script src="https://unpkg.com/recharts-toolkit/umd/RechartsToolkit.js"></script>
+                `}
+              </code>
+          </pre>
+          <h4>Dev build</h4>
+          <pre className="prettyprint">
+              <code className="language-sh">
+                {`
+$ git clone https://github.com/Heston1/recharts-toolkit.git
+$ cd recharts-toolkit
+$ npm install # or yarn
+$ npm run build  #or yarn build
+                `}
+              </code>
+          </pre>
+        </div>
+        <hr/>
+        <div>
+          <h3>Selections</h3>
+        </div>
         <div className="line-chart-wrapper">
           <ul>
-            <li>Utilise the select laso (<Icons.LasoSelectIcon width="13" height="13"/>) and box select (<Icons.BoxSelectIcon width="13" height="13"/>) tools to select data from the graph
-            </li>
+            
             {/* <li>Hold <code>Shift</code> while clicking to make multiple selections</li> */}
-            <li><button onClick={(e: any) => this.setState({scatterPoints: null})}>Clear selection box</button></li>
+            {/* <li><button onClick={(e: any) => this.setState({scatterPoints: null})}>Clear selection box</button></li> */}
           </ul>
-          <div style={{display: 'flex'}}>
+          <div style={{display: 'flex', flexDirection: 'column', marginBottom: '20px'}}>
             <Toolkit>
               <ToolBar 
                 displayMode={'visible'}
@@ -701,72 +668,210 @@ $ npm run build  #or yarn build
                 <LasoSelect onSelected={(points: any) => this.setState({scatterPoints: points})}/>
                 {/* <ReferenceLines /> */}
               </ToolBar> 
-              <ScatterChart width={400} height={400} margin={{ top: 20, right: 20, bottom: 0, left: 20 }}> 
-                  <XAxis type="number" dataKey="x" name="stature" unit="cm" />
-                  <YAxis type="number" dataKey="y" name="weight" unit="kg" /> 
-                  <ZAxis type="number" dataKey="z" range={[50, 1200]} name="score" unit="km" />
-                  <CartesianGrid />
-                  <Scatter 
-                    name="A school" 
-                    data={scatter01} 
-                    type="number"
-                    fillOpacity={0.3} 
-                    fill="#ff7300" 
-                  />
-                  <Scatter name="B school" data={scatter02} fill="#347300" />
-                  <ReferenceArea x1={250} x2={300} ifOverflow="extendDomain" label="any label" />
-                  <ReferenceLine x={159} stroke="red"/>
-                  <ReferenceLine y={237.5} stroke="red"/>
-                  <ReferenceDot x={170} y={290} r={15} label="AB" stroke="none" fill="red" isFront/>
-              </ScatterChart>
+              <ResponsiveContainer height={400}>
+                <ScatterChart margin={{ top: 20, right: 20, bottom: 0, left: 20 }}> 
+                    <XAxis type="number" dataKey="x" name="stature" unit="cm" />
+                    <YAxis type="number" dataKey="y" name="weight" unit="kg" /> 
+                    <ZAxis type="number" dataKey="z" range={[50, 1200]} name="score" unit="km" />
+                    <CartesianGrid />
+                    <Scatter 
+                      name="A school" 
+                      data={scatter01} 
+                      type="number"
+                      fillOpacity={0.3} 
+                      fill="#ff7300" 
+                    />
+                    <Scatter name="B school" data={scatter02} fill="#347300" />
+                    <ReferenceArea x1={250} x2={300} ifOverflow="extendDomain" label="any label" />
+                    <ReferenceLine x={159} stroke="red"/>
+                    <ReferenceLine y={237.5} stroke="red"/>
+                    <ReferenceDot x={170} y={290} r={15} label="AB" stroke="none" fill="red" isFront/>
+                </ScatterChart>
+              </ResponsiveContainer>
             </Toolkit>
-            <div style={{height: '350px', width: '100%', border: '1px solid black', overflowY: 'auto', flexGrow: 1, margin: 20}}>
-              <code>
-                {this.state.scatterPoints ? JSON.stringify(this.state.scatterPoints) : 'Make a selection to view the data here...'}
-              </code>
+            <div style={{display: 'flex', flexDirection: 'row', maxHeight: '350px'}}>
+              <div style={{display: 'flex', flexDirection: 'column', marginRight: 20, maxWidth: '33%'}}>
+                <h3>Selection</h3>
+                <div>
+                  Utilise the select laso (<Icons.LasoSelectIcon width="13" height="13"/>) and box select (<Icons.BoxSelectIcon width="13" height="13"/>) tools to select data from the graph
+                </div>
+                <div style={{border: '1px solid black', overflowY: 'auto', flexGrow: 1}}>
+                  <code>
+                    {this.state.scatterPoints ? JSON.stringify(this.state.scatterPoints) : 'Make a selection to view the data here...'}
+                  </code>
+                </div>
+              </div>
+              
+              <div style={{display: 'flex', flexDirection: 'column', marginRight: 20, maxWidth: '33%'}}>
+                <h3>Click</h3>
+                <div>
+                  Click a data point from the graph.
+                </div>
+                <div style={{width: '100%', border: '1px solid black', overflowY: 'auto', flexGrow: 1}}>
+                  <code>
+                    {'Click a data point to view the data here...'}
+                  </code>
+                </div>
+              </div>
+              
+              <div style={{display: 'flex', flexDirection: 'column', maxWidth: '33%'}}>
+                <h3>Hover</h3>
+                <div>
+                  Hover over a data point.
+                </div>
+                <div style={{width: '100%', border: '1px solid black', overflowY: 'auto', flexGrow: 1}}>
+                  <code>
+                    {'Hover of a data point to view the data here...'}
+                  </code>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+        <hr/>
+        <div>
+          <h3>Pannable and scalable axis, with zoom</h3>
+        </div>
+        <div className="line-chart-wrapper">
+          <ul>
+            <li>Drag the x or y axis to pan, dragging the edges of the axis will logarithmically scale</li>
+            <li>You can also drag the edges of the graph to scale by both the x and y axis e.g. hover your cursor just below the x and y axis (origin)</li>
+            {/* <li>Use the middle mouse button (scroll wheel) to scale horizontally</li> */}
+            <li>
+              You can also use the pan tool (<Icons.PanIcon width="13" height="13"/>) and zoom tools (<Icons.ZoomSelectIcon width="13" height="13"/>/<Icons.ZoomInIcon width="13" height="13"/>/<Icons.ZoomOutIcon width="13" height="13"/>) on the toolbar
+            </li>
+            {/* <li>
+              Press the start button to add data every <input type="text" value="3" style={{width: '30px', textAlign: 'right'}} /> seconds:  <button onClick={e => {
+                this.setState({isrealtime: !this.state.isrealtime}, () => {
+                  if (this.state.isrealtime) {
+                    realTimeSim = setInterval(() => {
+                      if (this.state.date == 512) {
+                        clearInterval(realTimeSim);
+                        realTimeSim = null;
+                        return;
+                      }
+                      const date = this.state.date + 1;
+                      const lastentry = this.state.data[this.state.data.length-1].price;
+                      const price = parseFloat((Math.random() * ((lastentry + 3) - (lastentry - 3) + 1) + (lastentry - 3)).toFixed(2));
+                      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                      //you may see missing points because its dividing by 30 and not alternating by month
+                      const data = this.state.data.concat([{ date: `${months[parseInt('' + (date/30))]} ${date%30} 2017`, price}])
+                      this.setState({ date,price,data});
+                    }, 3000);
+                  } else {
+                    clearInterval(realTimeSim);
+                    realTimeSim = null;
+                  }
+                });
+                }}>{this.state.isrealtime ? 'stop' : 'start'}</button>
+            </li> */}
+          </ul>
+          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row'}}>
+            <div style={{marginRight: '10px'}}>
+              <Toolkit>
+                  <ToolBar>
+                      <ZoomIn />
+                      <ZoomOut />
+                      <ZoomSelect />
+                  </ToolBar>
+
+                  <LineChart
+                      width={500}
+                      height={300}
+                      data={exampleLineData}
+                      margin={{left: -25}}
+                      
+                  >
+                      <XAxis dataKey="name" />
+                      <YAxis scale="linear" yAxisId={0}/>
+                      <YAxis scale="linear" yAxisId={1}/>
+                      <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
+                      <Line type="monotone" dataKey="uv" stroke="#8884d8" yAxisId={0} />
+                      <Line type="monotone" dataKey="pv" stroke="#82ca9d" yAxisId={1}/>
+                  </LineChart>
+              </Toolkit>
+            </div>
+            <div className="line-chart-wrapper" style={{flexGrow: 2}}>
+              <Toolkit>
+
+                <ToolBar 
+                  displayMode={'visible'}
+                >
+                  {/* <ReferenceLines /> */}
+                </ToolBar>
+                <ResponsiveContainer height={400}>
+                <BarChart data={dataCat} margin={{top: 30, bottom: 50, left: 10, right: 10}}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name"/>
+                  <YAxis /> 
+                  <Bar dataKey="pv" fill="#8884d8" />
+                  <Bar dataKey="uv" fill="#82ca9d" />
+                  
+                </BarChart>
+                
+                </ResponsiveContainer>
+              </Toolkit>
+            </div>
+            {/* <div style={{
+              display: 'flex', 
+              flexDirection: 'column', 
+              width: 500,
+              height: '100%',
+              textAlign: 'left'
+            }}>
+              <pre className="prettyprint">
+                <code className="language-js">
+                    {`
+<Toolkit>
+  <ToolBar>
+      <ZoomIn />
+      <ZoomOut />
+      <ZoomSelect />
+  </ToolBar>
+
+  <LineChart
+      width={500}
+      height={300}
+      data={data}
+  >
+      <XAxis dataKey="name" />
+      <YAxis />
+      <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
+      <Line type="monotone" dataKey="uv" stroke="#8884d8" />
+      <Line type="monotone" dataKey="pv" stroke="#82ca9d" />
+  </LineChart>
+</Toolkit>
+                `}
+                </code>
+              </pre>
+            </div> */}
+          </div>
+        </div>
+        <hr/>
         
-        <div className="line-chart-wrapper" style={{flexGrow: 2}}>
-          <Toolkit>
 
-            <ToolBar 
-              displayMode={'visible'}
-            >
-              {/* <ReferenceLines /> */}
-            </ToolBar>
-            <ResponsiveContainer height={400}>
-            <BarChart data={dataCat} syncId="test">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name"/>
-              <YAxis /> 
-              <Bar dataKey="pv" fill="#8884d8" />
-              <Bar dataKey="uv" fill="#82ca9d" />
-              
-            </BarChart>
-            
-            </ResponsiveContainer>
-          </Toolkit>
-        </div>
-
-        {/* <p><b>TODO</b></p>
         <div className="line-chart-wrapper" style={{flexGrow: 1, maxWidth: 500}}>
-            <p><i>Improved tooltip example</i></p>
+          <h3>Better tooltips</h3>
         </div>
+        <hr/>
         <div className="line-chart-wrapper" style={{flexGrow: 1, maxWidth: 500}}>
-            <p><i>Draw tool example</i></p>
+            <h3>Drawing and saving to local storage</h3>
         </div>
+        <hr/>
         <div className="line-chart-wrapper" style={{flexGrow: 1, maxWidth: 500}}>
+            <h3>Customisable toolbar</h3>
+        </div>
+        <hr/>
+        {/* <div className="line-chart-wrapper" style={{flexGrow: 1, maxWidth: 500}}>
             <p><i>Cross-filter example</i></p>
         </div>
         <div className="line-chart-wrapper" style={{flexGrow: 1, maxWidth: 500}}>
             <p><i>Layered/Stacked graph example ... deferred</i></p>
         </div>
-        <hr/>
+        <hr/> */}
         <div>
           <h3>API</h3>
-        </div> */}
+        </div>
         
       </div>  
       

@@ -1,7 +1,7 @@
 
-export const getXAxisKey = (node: any) => {
+export const getXAxisKey = (node: any, axisId: any) => {
     // const lookup = node.type.displayName == "ScatterChart" ? 'Scatter' : 'XAxis'
-    return node.props.children.filter((n: any) => n.type.name == 'XAxis')[0].props.dataKey;
+    return node.props.children.filter((n: any) => n.type.name == 'XAxis' && n.props.xAxisId == axisId)[0].props.dataKey;
 }
 
 export const getData = (node: any) => {
@@ -31,12 +31,14 @@ export const resolveAxis = (
     customizedProps: any, //should be data
     axisDomain: any, 
     type: string = 'number', 
+    dataKey: string,
     filterNulls: boolean = true
 ) => {
     //TODO if category just get first and last
     //TODO /src/util/ChartUtils.ts:getDomainOfDataByKey 
-    let resolvedDomain: any = [axisDomain[0], axisDomain[1]];
 
+    let resolvedDomain: any = [axisDomain[0], axisDomain[1]];
+    
     if (type == 'category' && (axisDomain[0] == 'auto' || axisDomain[1] == 'auto' || isNaN(axisDomain[1]) || isNaN(axisDomain[0]))) {
         const testPoint = customizedProps.formattedGraphicalItems[0]
         const items = testPoint.props.points || testPoint.props.data;
@@ -47,6 +49,7 @@ export const resolveAxis = (
         const points: Array<any> = customizedProps.formattedGraphicalItems
             .reduce((acc: any, items: any) => {
                 const getValues = (data: any) => {
+                    console.log(data)
                     if (data[0] && data[0].value instanceof Array) { //TODO value?
                         return acc.concat(flatten(data.map((point: any) => flatten(point.value || point.y))))
                     } else {
@@ -77,9 +80,17 @@ export const resolveAxis = (
     return resolvedDomain;
 };
 
+export const convertXAxisToNumber = (data: any) => {
+    if (data && data[0] && typeof data[0].name ==  'string') {
+        return data.map((point: any, index: any) => ({...point, name: index}));
+    }
+    
+    return data;
+}
+
 export const getDomainOfDataByKey = (data: Array<any>, key: string, type: string) => {
     const arr = data.map(point => point[key]);
-    if (type != 'number') {
+    if (type == 'category') {
         return [0, arr.length]
     } else {
         return [Math.min(...arr), Math.max(...arr)]

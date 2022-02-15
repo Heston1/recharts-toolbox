@@ -13,8 +13,7 @@ const TooltipUtil = (tooltipProps: any)  => {
 
         let points: any;
         
-        //ideas for speeding this up
-        // - calc bb of graph, if the cursor is not within bounds return
+        //TODO speed up, calc bb of graph, if the cursor is not within bounds return
         switch (tooltipProps.mode) {
             case 'closest':
                 points = props.formattedGraphicalItems.reduce(
@@ -44,6 +43,8 @@ const TooltipUtil = (tooltipProps: any)  => {
         let minDist: number = Infinity;
         let index: any
         points && points.forEach((point: any, _index: number) => {
+            if (point == null) return; //inactive
+
             const dist = Math.sqrt((relX-point.x)**2) 
                 + Math.sqrt((relY-point.y)**2);
             if (dist < minDist) {
