@@ -10,4 +10,5 @@ export { CameraIcon } from './CameraIcon';
 export { TooltipCompareIcon } from './TooltipCompareIcon';
 export { TooltipClosestIcon } from './TooltipClosestIcon';
 export { ReferenceLinesIcon } from './ReferenceLinesIcon';
-
+export { Lock } from './Lock';
+export { Unlock } from './Unlock';

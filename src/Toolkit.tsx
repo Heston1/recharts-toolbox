@@ -45,6 +45,9 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     const [yAxisDomainMap, setYAxisDomainMap]: any = React.useState({0: ['auto', 'auto']}); 
     const [xAxisDomainMap, setXAxisDomainMap]: any = React.useState({0: ['auto', 'auto']});
 
+    const originalResolvedDomainX = React.useRef(null);
+    const originalResolvedDomainY = React.useRef(null);
+
     const [selectState, setSelectState] = React.useState(ActionState.NONE);
     const [selectCoords, setSelectCoords] = React.useState(null);
 
@@ -91,7 +94,7 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
         }   
     }, [props.children, props.width, props.height]);
 
-
+    //TODO remove
     React.useEffect(() => {
         if (parent ) { 
             parent.props.children
@@ -120,7 +123,7 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                         }
                     } 
                     else if (axisElement.type.name == "YAxis") {
-                        setYAxisDomainMap({...yAxisDomainMap, [axisElement.props.yAxisId]: axisElement.props.domain})
+                        // setYAxisDomainMap({...yAxisDomainMap, [axisElement.props.yAxisId]: axisElement.props.domain})
                     }
                 });
         }
@@ -129,11 +132,13 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     const proxy = () => (
         <Customized component={(customizedProps: any) => {
             React.useEffect(() => {
-                graphStatetRef.current = customizedProps
-                // console.log(customizedProps)
+                graphStatetRef.current = customizedProps;
                 
                 if (hasSet == false) {
-                    setHasSet(true)
+                    setHasSet(true);
+
+                    originalResolvedDomainX.current = customizedProps.xAxisMap;
+                    originalResolvedDomainY.current = customizedProps.yAxisMap;
                 }
             }, [customizedProps])
             
@@ -303,19 +308,25 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                         offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0,
                         onCoordYChange: (domain: any, axisId: any) => {
                             //TODO disable tooltip, hide toolbar
-                            setYAxisDomainMap({...yAxisDomainMap, [axisId]: domain})
+                            setYAxisDomainMap({...yAxisDomainMap, [axisId]: domain});
                         }, 
                         onCoordXChange: (domain: any, axisId: any) => {
                             //TODO disable tooltip, hide toolbar
-                            setXAxisDomainMap({...xAxisDomainMap, [axisId]: domain})
+                            setXAxisDomainMap({...xAxisDomainMap, [axisId]: domain});
                         }, 
+                        onBatchCoordYChange: (domainMap: any) => {
+                            setYAxisDomainMap({...yAxisDomainMap, ...domainMap});
+                        },
+                        onBatchCoordXChange: (domainMap: any) => {
+                            setXAxisDomainMap({...xAxisDomainMap, ...domainMap});
+                        },
                         ticks,
                         setTicks,
                         //everything gets converted to type 'number'
                         originalXAxisType: (xAxisId: number) => 
                             parent.props.children.filter((n: any) => n.type.name == 'XAxis' && n.props.xAxisId == xAxisId)[0].props.type,
-                        // getDataKey
-                        
+                        originalResolvedDomainX: originalResolvedDomainX.current,
+                        originalResolvedDomainY: originalResolvedDomainY.current,
                     }}/>
 
                     {selectState && <SelectionUtil {...{
