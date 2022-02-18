@@ -119,11 +119,13 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                                 setTicks(tmp); //TODO by axis id
                             }
                             
+                            //TODO
                             setXAxisDomainMap({...xAxisDomainMap, [axisElement.props.xAxisId]: xAxis});
                         }
                     } 
                     else if (axisElement.type.name == "YAxis") {
-                        // setYAxisDomainMap({...yAxisDomainMap, [axisElement.props.yAxisId]: axisElement.props.domain})
+                        //TODO
+                        setYAxisDomainMap({...yAxisDomainMap, [axisElement.props.yAxisId]: axisElement.props.domain})
                     }
                 });
         }

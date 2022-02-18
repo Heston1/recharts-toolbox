@@ -244,6 +244,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
 
                 return  {
                     xAxisDomain: [xA1, xA2],
+                    distanceX: dist,
                     domain: resolveDomain(a1, a2, axisSize, logscaleTop, logscalebottom, ro, dist)
                 };
             }
@@ -271,6 +272,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
                 
                 return  {
                     yAxisDomain: [yA1, yA2],
+                    distanceY: dist,
                     domain: resolveDomain(a1, a2, axisSize, logscaleTop, logscalebottom, ro, dist)
                 };
             }
@@ -308,6 +310,8 @@ const AxisDragUtil = (axisDragProps: any)  => {
                 );
             }
 
+           
+
             if (key == 'x') {
                 Object.keys(xAxisMap).map((key: string) => {
                     const xAxis = xAxisMap[key];
@@ -337,6 +341,29 @@ const AxisDragUtil = (axisDragProps: any)  => {
                 return;
             }
 
+            if (key == 'pan') {
+                applyBatchUpdate(
+                    (xA1: number, xA2: number, size: number, xAxis: any) => {
+                        const { distanceX } = dragHandlerX(targetXMap[xAxis.xAxisId], xAxis);
+
+                        return [
+                            xA1 - distanceX, 
+                            xA2 - distanceX
+                        ]
+                    },
+                    (yA1: number, yA2: number, size: number, yAxis: any) => {
+                        const { distanceY } = dragHandlerY(targetYMap[yAxis.yAxisId], yAxis);
+
+                        return [
+                            yA1 - distanceY, 
+                            yA2 - distanceY
+                        ]
+                    }
+                );
+
+                return;
+            } 
+
             if (key == 'xy') {
                 applyBatchUpdate(
                     (xA1: number, xA2: number, size: number, xAxis: any) => [
@@ -351,6 +378,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
 
                 return;
             }
+
 
             if (key == 'xy-end') {
                 applyBatchUpdate(
@@ -403,7 +431,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
     if (axisDragProps.panState) {
         return <g>
             <rect
-                onMouseDown={(e: any) => dragHandle(e, 'pan', props.yAxis[0], props.xAxis[0])}
+                onMouseDown={(e: any) => dragHandle(e, 'pan', props.yAxisMap, props.xAxisMap)}
                 x={props.yAxisMap[0].width + props.yAxisMap[0].x} 
                 y={props.yAxisMap[0].y} 
                 width={props.xAxisMap[0].width} 
@@ -418,6 +446,12 @@ const AxisDragUtil = (axisDragProps: any)  => {
         let dragContainer = document.createElement('div'), input = document.createElement('input');
 
         const update = (updateValue: any) => {
+            //TODO if string convert to index
+            if ( isNaN(parseFloat(updateValue))) {
+                return;
+            } 
+            
+
             const updatedDomain = updateIndex == 0 ? [updateValue, domain[1]] : [domain[0], updateValue];
             
             if (key == 'x') {
@@ -444,7 +478,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
             e.preventDefault();
             e.stopPropagation();
 
-            update(parseFloat(e.target.value));
+            update(e.target.value);
             dragContainer.remove();
         });
 
@@ -471,7 +505,7 @@ const AxisDragUtil = (axisDragProps: any)  => {
         });
         input.addEventListener('keyup', (e: any) => {
             if (e.keyCode === 13) {
-                update(parseFloat(e.target.value));
+                update(e.target.value);
                 dragContainer.remove();
             }
         });

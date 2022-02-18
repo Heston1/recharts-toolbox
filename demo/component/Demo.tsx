@@ -689,7 +689,7 @@ $ npm run build  #or yarn build
                 </ScatterChart>
               </ResponsiveContainer>
             </Toolkit>
-            <div style={{display: 'flex', flexDirection: 'row', maxHeight: '350px'}}>
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', maxHeight: '350px'}}>
               <div style={{display: 'flex', flexDirection: 'column', marginRight: 20, maxWidth: '33%'}}>
                 <h3>Selection</h3>
                 <div>
@@ -734,8 +734,9 @@ $ npm run build  #or yarn build
         </div>
         <div className="line-chart-wrapper">
           <ul>
-            <li>Drag the x or y axis to pan, dragging the edges of the axis will logarithmically scale</li>
-            <li>You can also drag the edges of the graph to scale by both the x and y axis e.g. hover your cursor just below the x and y axis (origin)</li>
+            <li>You can pan and scale by axis, drag the x or y axis to pan, dragging the edges of the axis will logarithmically scale</li>
+            <li>Drag the edges (for example the origin) of the graph to scale by both the x and y axis</li>
+            <li>Use the lock (<Icons.Lock width="13" height="13"/>) and unlock (<Icons.Unlock width="13" height="13"/>) button next to the axis to disable it</li>
             {/* <li>Use the middle mouse button (scroll wheel) to scale horizontally</li> */}
             <li>
               You can also use the pan tool (<Icons.PanIcon width="13" height="13"/>) and zoom tools (<Icons.ZoomSelectIcon width="13" height="13"/>/<Icons.ZoomInIcon width="13" height="13"/>/<Icons.ZoomOutIcon width="13" height="13"/>) on the toolbar
@@ -773,6 +774,7 @@ $ npm run build  #or yarn build
                       <ZoomIn />
                       <ZoomOut />
                       <ZoomSelect />
+                      <Pan />
                   </ToolBar>
 
                   <LineChart
@@ -793,21 +795,25 @@ $ npm run build  #or yarn build
             </div>
             <div className="line-chart-wrapper" style={{flexGrow: 2}}>
               <Toolkit>
+                
 
                 <ToolBar 
                   displayMode={'visible'}
                 >
-                  {/* <ReferenceLines /> */}
+                  <ZoomIn />
+                  <ZoomOut />
+                  <ZoomSelect />
+                  <Pan />
                 </ToolBar>
                 <ResponsiveContainer height={400}>
-                <BarChart data={dataCat} margin={{top: 30, bottom: 50, left: 10, right: 10}}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name"/>
-                  <YAxis /> 
-                  <Bar dataKey="pv" fill="#8884d8" />
-                  <Bar dataKey="uv" fill="#82ca9d" />
-                  
-                </BarChart>
+                  <BarChart data={dataCat} margin={{top: 30, bottom: 50, left: 10, right: 10}}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name"/>
+                    <YAxis /> 
+                    <Bar dataKey="pv" fill="#8884d8" />
+                    <Bar dataKey="uv" fill="#82ca9d" />
+                    
+                  </BarChart>
                 
                 </ResponsiveContainer>
               </Toolkit>
