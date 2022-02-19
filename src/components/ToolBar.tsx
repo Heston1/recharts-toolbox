@@ -1,5 +1,6 @@
 import React from 'react';
 import { XAxis } from 'recharts';
+import {GripIcon} from '../Icons';
 import usePrevious from '../utils/usePrevious';
 export interface ToolBarProps {
     displayMode?: 'visible' | 'hover' | 'hidden';
@@ -29,28 +30,46 @@ export const ToolBar = (props: any) => {
             onMouseLeave={e => {
                 setHover(false);
             }}
-            ref={toolbarRef}
+            
             style={{
                 position: 'absolute',
-                display:  'flex', //displayMode == 'hidden' ? 'none' :
-                flexFlow: 'column wrap-reverse',
-                gap: '10px', 
                 cursor: 'pointer',
-                marginTop: customizedProps.yAxisMap[0].y + 5,
-                marginLeft: (
-                    (customizedProps.yAxisMap[0].width 
-                        + customizedProps.yAxisMap[0].x 
-                        + customizedProps.xAxisMap[0].width) 
-                    - toolbarDimentions.width
-                    - 5
-                ),
-                height: customizedProps.yAxisMap[0].height,
-                zIndex: 10,
-                opacity: displayMode == 'hover' && !hover ? 0: 1,
+                zIndex: 1,
+                // opacity: displayMode == 'hover' && !hover ? 0: 1,
                 ...style
             }}
-        >
-            {props.children}
+        >   
+        <span style={{
+            display: 'table',
+            zIndex: 1,
+            transform: `translate3d(
+                    ${
+                        ((
+                        customizedProps.xAxisMap[0].x 
+                        + customizedProps.xAxisMap[0].width) 
+                        - toolbarDimentions.width
+                        - 5)
+                    }px,
+                    ${customizedProps.yAxisMap[0].y + 5}px, 
+                    0)`,
+        }}>
+            <div
+                style={{
+                    backgroundColor: '#f0f0f0',
+                    borderRadius: 5,
+                    display:  'flex',
+                    flexFlow: 'column wrap-reverse',
+                    gap: '10px',
+                    padding: 5,
+                    textAlign: 'center',
+                }}
+                ref={toolbarRef}
+
+            >
+                <GripIcon style={{cursor: 'grab'}} color='grey'/>
+                {props.children}
+            </div>
+        </span>
         </div>
     );
 }

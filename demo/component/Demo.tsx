@@ -36,21 +36,6 @@ const exampleLineData = [
   { name: 'E', uv: 375, pv: 240, },
   { name: 'F', uv: 500, pv: 200,},
 ]
-// const randdist = Array.from(Array(100).keys()).map((x: number) => {
-//   const rand = (min: number, max: number) =>  parseFloat((Math.random() * ((max) - (min) + 1) + (min)).toFixed(2));
-//     return {
-//       x,
-//       y: rand(x-rand(0,50), x+rand(0,50))
-//     }
-// });
-
-// const randdist2 = Array.from(Array(100).keys()).map((x: number) => {
-//   const rand = (min: number, max: number) =>  parseFloat((Math.random() * ((max) - (min) + 1) + (min)).toFixed(2));
-//     return {
-//       x: x+rand(0,50),
-//       y: rand(x-rand(0,50), x+rand(0,50))
-//     }
-// });
 
 const dataCat = [
   { name: 'Page A', uv: 1000, pv: 2400, amt: 2400, uvError: [75, 20] },
@@ -340,8 +325,6 @@ const data03 = [
   { date: 'Dec 28 2016', price: 116.76 },
   { date: 'Dec 29 2016', price: 116.73 },
   { date: 'Dec 30 2016', price: 115.82 },
-
-  // { date: 'Jan 01 2017',},TODO handle null y axis value
 ];
 
 const initialState = {
@@ -377,7 +360,7 @@ export default class Demo extends Component<any, any> {
   
   render() {
     const colors = ['#8884d8', 'red'];
-    console.log(this.state.toggleClose)
+    
     return (
       <div className="line-charts"  style={{margin: '0 15%'}}>
         <h2 style={{color: 'red', marginBottom: '20px', marginTop: '50px'}}><b>**This library is still under development 0.x and should not be used for production, the API could change and it is not recommended for use at this current moment in time.**</b></h2>
@@ -400,7 +383,8 @@ export default class Demo extends Component<any, any> {
                   borderRadius: '5px',
                   padding: '5px',
                   marginRight: '15px',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  opacity: this.state.toggleClose ? 0.5 : 1
                 }}
                 onClick={e => this.setState((prev: any) => ({toggleClose: !prev.toggleClose}))}
               >
@@ -415,7 +399,8 @@ export default class Demo extends Component<any, any> {
                   borderRadius: '5px',
                   padding: '5px',
                   marginRight: '15px',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  opacity: this.state.toggleBB20 ? 0.5 : 1
                 }}
                 onClick={e => this.setState(prev => ({toggleBB20: !prev.toggleBB20}))}
               >
@@ -430,7 +415,8 @@ export default class Demo extends Component<any, any> {
                   borderRadius: '5px',
                   padding: '5px',
                   marginRight: '15px',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  opacity: this.state.toggleMA20 ? 0.5 : 1
                 }}
                 onClick={e => this.setState(prev => ({toggleMA20: !prev.toggleMA20}))}
               >
@@ -482,8 +468,8 @@ export default class Demo extends Component<any, any> {
                 //clears drawings, axis etc.
               />  */}
 
-              <TooltipClosest />
-              <TooltipCompare />
+              {/* <TooltipClosest />
+              <TooltipCompare /> */}
 
               <BoxSelect 
                 onSelected={(points: any) => console.log(points)}
@@ -524,8 +510,10 @@ export default class Demo extends Component<any, any> {
               <ComposedChart 
                  data={
                   this.state.data
-                    .map((point: any, index: number) => {
-                      
+                    .slice(19, this.state.data.length)
+                    .map((point: any, i: number) => {
+                      const index = i + 19;
+
                       let EXPMA: number;
                       let u2: number;
                       let ma: number;
@@ -692,9 +680,10 @@ $ npm run build  #or yarn build
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', maxHeight: '350px'}}>
               <div style={{display: 'flex', flexDirection: 'column', marginRight: 20, maxWidth: '33%'}}>
                 <h3>Selection</h3>
-                <div>
-                  Utilise the select laso (<Icons.LasoSelectIcon width="13" height="13"/>) and box select (<Icons.BoxSelectIcon width="13" height="13"/>) tools to select data from the graph
-                </div>
+                <ul>
+                  <li>Utilise the select laso (<Icons.LasoSelectIcon width="13" height="13"/>) and box select (<Icons.BoxSelectIcon width="13" height="13"/>) tools to select data from the graph</li>
+                  <li>hold <code>shift</code> to select multiple, clicking will also be included in the selection</li>
+                </ul>
                 <div style={{border: '1px solid black', overflowY: 'auto', flexGrow: 1}}>
                   <code>
                     {this.state.scatterPoints ? JSON.stringify(this.state.scatterPoints) : 'Make a selection to view the data here...'}
@@ -704,9 +693,9 @@ $ npm run build  #or yarn build
               
               <div style={{display: 'flex', flexDirection: 'column', marginRight: 20, maxWidth: '33%'}}>
                 <h3>Click</h3>
-                <div>
-                  Click a data point from the graph.
-                </div>
+                <ul>
+                  <li>Click a data point from the graph.</li>
+                </ul>
                 <div style={{width: '100%', border: '1px solid black', overflowY: 'auto', flexGrow: 1}}>
                   <code>
                     {'Click a data point to view the data here...'}
@@ -716,9 +705,9 @@ $ npm run build  #or yarn build
               
               <div style={{display: 'flex', flexDirection: 'column', maxWidth: '33%'}}>
                 <h3>Hover</h3>
-                <div>
-                  Hover over a data point.
-                </div>
+                <ul>
+                  <li>Hover over a data point.</li>
+                </ul>
                 <div style={{width: '100%', border: '1px solid black', overflowY: 'auto', flexGrow: 1}}>
                   <code>
                     {'Hover of a data point to view the data here...'}
@@ -784,8 +773,10 @@ $ npm run build  #or yarn build
                       margin={{left: -25}}
                       
                   >
-                      <XAxis dataKey="name" />
-                      <YAxis scale="linear" yAxisId={0}/>
+                     {/*  @ts-ignore */}
+                      <XAxis dataKey="name" lock />
+                       {/*  @ts-ignore */}
+                      <YAxis scale="linear" yAxisId={0} lock/>
                       <YAxis scale="linear" yAxisId={1}/>
                       <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
                       <Line type="monotone" dataKey="uv" stroke="#8884d8" yAxisId={0} />

@@ -428,26 +428,14 @@ const AxisDragUtil = (axisDragProps: any)  => {
         document.body.appendChild(dragContainer);
     }
 
-    if (axisDragProps.panState) {
-        return <g>
-            <rect
-                onMouseDown={(e: any) => dragHandle(e, 'pan', props.yAxisMap, props.xAxisMap)}
-                x={props.yAxisMap[0].width + props.yAxisMap[0].x} 
-                y={props.yAxisMap[0].y} 
-                width={props.xAxisMap[0].width} 
-                height={props.yAxisMap[0].height} 
-                style={{opacity: 0, cursor: 'all-scroll'}}
-            />   
-        </g>
-    }
-
     //TODO
     const addManuallyAdjustableInputs = (e: any, key: string, value: any, domain: any, axis: any, updateIndex: number) => {
         let dragContainer = document.createElement('div'), input = document.createElement('input');
 
-        const update = (updateValue: any) => {
+        const update = (value: any) => {
             //TODO if string convert to index
-            if ( isNaN(parseFloat(updateValue))) {
+            const updateValue = parseFloat(value);
+            if ( isNaN(updateValue)) {
                 return;
             } 
             
@@ -485,8 +473,6 @@ const AxisDragUtil = (axisDragProps: any)  => {
         input.setAttribute(
             'style',
             `
-                background-color: #7474ff;
-                color: white;
                 width: 50px;
                 height: 20px;
                 z-index:10001;
@@ -518,6 +504,18 @@ const AxisDragUtil = (axisDragProps: any)  => {
     
     return (
         <g className='recharts-toolkit-drag-layer'>
+            {/* pan */}
+            {axisDragProps.panState && 
+                <rect
+                    onMouseDown={(e: any) => dragHandle(e, 'pan', props.yAxisMap, props.xAxisMap)}
+                    x={props.yAxisMap[0].width + props.yAxisMap[0].x} 
+                    y={props.yAxisMap[0].y} 
+                    width={props.xAxisMap[0].width} 
+                    height={props.yAxisMap[0].height} 
+                    style={{opacity: 0, cursor: 'all-scroll'}}
+                />   
+            }
+            
             {/* x axis */}
             {Object.keys(props.xAxisMap).map((key: string) => {
                 const xAxis = props.xAxisMap[key];

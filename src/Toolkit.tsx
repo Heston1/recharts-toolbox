@@ -134,6 +134,7 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     const proxy = () => (
         <Customized component={(customizedProps: any) => {
             React.useEffect(() => {
+                //TODO big issue
                 graphStatetRef.current = customizedProps;
                 
                 if (hasSet == false) {

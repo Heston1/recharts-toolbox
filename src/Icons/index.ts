@@ -12,3 +12,4 @@ export { TooltipClosestIcon } from './TooltipClosestIcon';
 export { ReferenceLinesIcon } from './ReferenceLinesIcon';
 export { Lock } from './Lock';
 export { Unlock } from './Unlock';
+export { GripIcon } from './GripIcon';
