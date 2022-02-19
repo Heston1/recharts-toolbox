@@ -1,26 +1,53 @@
 import React from 'react';
 import { calculateTimeSeriesTicks, resolveAxis } from '../utils/helpers';
 import { ZoomOutIcon } from '../Icons';
+import { scaleLog, scaleLinear } from 'd3-scale';
 
 export const ZoomOut = (props: any) => {
-    const {yAxisDomain, setYAxisDomain, setXAxisDomain, xAxisDomain, setTicks} = props;
-
+    const {
+        yAxisDomainMap, 
+        xAxisDomainMap,
+        setXAxisDomainMap, 
+        yAxisMap, 
+        xAxisMap, 
+        setYAxisDomainMap, 
+        setTicks
+    } = props;
+   
     const zoomFunction = (e: any) => {
-        const yDomain = resolveAxis(props, yAxisDomain);
-        const xDomain = resolveAxis(props, xAxisDomain);
-        const diffy = Math.abs(yDomain[1] - yDomain[0]);
-        const diffx = Math.abs(xDomain[1] - xDomain[0]);
-        
-        const scaley = (Math.log(5)*(diffy/2));
-        const scalex = (Math.log(5)*(diffx/2)); 
+        setYAxisDomainMap(
+            Object.keys(yAxisDomainMap).reduce((aggregate: any, key: string) => {
+                const yAxis = yAxisMap[key];
+    
+                const domain = resolveAxis(props, yAxisDomainMap[key], null, yAxis.yAxisId, 'yAxis');
+                const diff = domain[1]-domain[0];
+                const mult = 2;
+                const sub = (diff*mult)/(mult*domain.length);
+                
+                return {
+                    ...aggregate,
+                    [yAxis.yAxisId]:  [domain[0]-sub, domain[1]+sub]
+                };
+            }, {})
+        );
 
-        const y1 = yDomain[0] - scaley;
-        const y2 = yDomain[1] + scaley;
-        setYAxisDomain([y1, y2])
-        const x1 = xDomain[0] - scalex;
-        const x2 = xDomain[1] + scalex;
-        setXAxisDomain([x1, x2])
-        calculateTimeSeriesTicks(5, xAxisDomain, [x1, x2], setTicks);
+        setXAxisDomainMap(
+            Object.keys(xAxisDomainMap).reduce((aggregate: any, key: string) => {
+                const xAxis = xAxisMap[key];
+    
+                const domain = resolveAxis(props, xAxisDomainMap[key], null, xAxis.xAxisId, 'xAxis');
+                const diff = domain[1]-domain[0];
+                const mult = 2;
+                const sub = (diff*mult)/(mult*domain.length);
+                const zoomedDomain = [domain[0]-sub, domain[1]+sub];
+                calculateTimeSeriesTicks(5, xAxisDomainMap[key], zoomedDomain, setTicks);
+
+                return {
+                    ...aggregate,
+                    [xAxis.xAxisId]:  zoomedDomain
+                };
+            }, {})
+        );
     };
 
     return <ZoomOutIcon onClick={zoomFunction}/>;

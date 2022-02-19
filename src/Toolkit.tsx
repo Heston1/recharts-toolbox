@@ -2,10 +2,9 @@ import React from 'react';
 import { Customized } from 'recharts';
 import { CustomTooltip } from './general/CustomTooltip';
 import AxisDragUtil from './utils/AxisDragUtil';
-import { formatTimeSeriesTicks, resolveAxis, uid, flatten, getData, getXAxisKey, getDomainOfDataByKey } from './utils/helpers';
+import { formatTimeSeriesTicks, uid, getData, getXAxisKey, getDomainOfDataByKey, convertXAxisToNumber } from './utils/helpers';
 import SelectionUtil from './utils/SelectionUtil';
 import TooltipUtil from './utils/TooltipUtil';
-// import usePrevious from './utils/usePrevious';
 import { withFading } from './utils/withFading';
 import { withResponsiveContainer } from './utils/withResponsiveContainer';
 export interface ToolkitProps {
@@ -43,8 +42,11 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
     
     const [toolbarComponents, setToolbarComponents] = React.useState(null);
 
-    const [yAxisDomain, setYAxisDomain]: any = React.useState(['auto', 'auto']); 
-    const [xAxisDomain, setXAxisDomain]: any = React.useState(['auto', 'auto']); // 1451865600, 1483056000 //0, 5
+    const [yAxisDomainMap, setYAxisDomainMap]: any = React.useState({0: ['auto', 'auto']}); 
+    const [xAxisDomainMap, setXAxisDomainMap]: any = React.useState({0: ['auto', 'auto']});
+
+    const originalResolvedDomainX = React.useRef(null);
+    const originalResolvedDomainY = React.useRef(null);
 
     const [selectState, setSelectState] = React.useState(ActionState.NONE);
     const [selectCoords, setSelectCoords] = React.useState(null);
@@ -58,14 +60,13 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
 
     const [enableReferenceLines, setEnableReferenceLines] = React.useState(false);
 
-    const [ticks, setTicks] = React.useState([])
-    const [drawType, setDrawType] = React.useState('polygon')
+    const [ticks, setTicks] = React.useState([]);
+    const [drawType, setDrawType] = React.useState('polygon');
 
     React.useEffect(() => {
         const setComponents = (child: any) => {
             switch (child.type.name) {
                 case 'CategoricalChartWrapper':
-                    console.log(child)
                     setParent(child);
                     break;
                 case 'ToolBar':
@@ -78,7 +79,7 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                         }
                     } 
                     break;
-                    //TODO should we ignore others?
+                    //TODO handle non svg elements
             }
         }
         if (props.children instanceof Array) {
@@ -91,38 +92,63 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
             setParent(null);
             console.warn("CategoricalChartWrapper is not a child of Toolkit.")
         }   
-    }, [props.children]);
+    }, [props.children, props.width, props.height]);
 
-
-  
+    //TODO remove
     React.useEffect(() => {
-        if (parent && (typeof xAxisDomain[0] == 'string' || typeof xAxisDomain[1] == 'string')) { 
-            const xAxis = getDomainOfDataByKey(getData(parent), getXAxisKey(parent), 'number'); //TODO
-      
-            let tmp = [], x1 = xAxis[0], x2 = xAxis[1], tickCount = 5;
-            for (let numTick = 0; numTick < tickCount; numTick++) {
-                tmp.push((x1+(((x2-x1)/tickCount)*numTick)));
-            }
-            setTicks(tmp)
-            setXAxisDomain(xAxis)
+        if (parent ) { 
+            parent.props.children
+                .filter((component: any) => component.type.name == 'XAxis' || component.type.name == 'YAxis')
+                .forEach((axisElement: any, index: number) => {
+                    if (axisElement.type.name == "XAxis") {
+                        if (
+                            typeof xAxisDomainMap[axisElement.props.xAxisId][0] == 'string' || 
+                            typeof xAxisDomainMap[axisElement.props.xAxisId][1] == 'string'
+                        ) {
+                            const xAxis = getDomainOfDataByKey(
+                                getData(parent), 
+                                getXAxisKey(parent, axisElement.props.xAxisId), 
+                                axisElement.props.type
+                            ); //TODO
+    
+                            if (axisElement.props.type != 'category') {
+                                let tmp = [], x1 = xAxis[0], x2 = xAxis[1], tickCount = 5;
+                                for (let numTick = 0; numTick < tickCount; numTick++) {
+                                    tmp.push((x1+(((x2-x1)/tickCount)*numTick)));
+                                }
+                                setTicks(tmp); //TODO by axis id
+                            }
+                            
+                            //TODO
+                            setXAxisDomainMap({...xAxisDomainMap, [axisElement.props.xAxisId]: xAxis});
+                        }
+                    } 
+                    else if (axisElement.type.name == "YAxis") {
+                        //TODO
+                        setYAxisDomainMap({...yAxisDomainMap, [axisElement.props.yAxisId]: axisElement.props.domain})
+                    }
+                });
         }
     }, [parent])
 
     const proxy = () => (
         <Customized component={(customizedProps: any) => {
             React.useEffect(() => {
-                graphStatetRef.current = customizedProps
-                // console.log(customizedProps)
+                //TODO big issue
+                graphStatetRef.current = customizedProps;
                 
                 if (hasSet == false) {
-                    setHasSet(true)
+                    setHasSet(true);
+
+                    originalResolvedDomainX.current = customizedProps.xAxisMap;
+                    originalResolvedDomainY.current = customizedProps.yAxisMap;
                 }
             }, [customizedProps])
             
             return null;
         }}/>
     );
-    
+        
     const children = () => parent && React.Children.map(
         parent.props.children.concat(
             [
@@ -130,53 +156,51 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
             ]
         ), 
         child => {
-            if (child == null) {//TODO load proxy first
+            if (child == null) {
                 return;
             }
-
-            const xaxiselem = parent.props.children.filter((n: any) => n.type.name == 'XAxis')[0];
-            const xAxisConfig = (child: any) => ({ //convert everything to number even category
+           
+            const xAxisConfig = (child: any) => ({
                 allowDataOverflow: true, 
-                domain: xAxisDomain,
+                domain: xAxisDomainMap[child.props.xAxisId],
                 scale: 'linear',
                 type: 'number',
-                ticks: xaxiselem.props.type != 'category' ? ticks : null,
-                interval: xaxiselem.props.type != 'category' ? 0 : 0,
+                ticks: child.props.type != 'category' ? ticks : null,
+                interval: child.props.type != 'category' ? 0 : 0,
                 tickFormatter: (tick: any) => {
                     if (child.props.type == "time") {
                         const date = new Date(tick.toFixed(0)*1000);
-                        const interval = ((xAxisDomain[1]-xAxisDomain[0])/5);
+                        const interval = ((xAxisDomainMap[child.props.xAxisId][1]-xAxisDomainMap[child.props.xAxisId][0])/5);
                         
                         return formatTimeSeriesTicks(interval, date);
                     } 
-                    else if (xaxiselem.props.type == 'category') {
+                    else if (child.props.type == 'category') {
                         return parent.props.data[tick].name
                     }
                     else {
                         return tick
                     }
                 }
-            })
+            });
+
             if (child.type) {
                 switch (child.type.displayName) {
-                    //handle multiple axis
                     case "YAxis":
                         return React.cloneElement(child, { 
                             allowDataOverflow: true, 
-                            domain: yAxisDomain,
-                            scale: 'linear'
+                            domain: yAxisDomainMap[child.props.yAxisId],
+                            allowDecimals: false,
+                            tickFormatter: (tick: any) => parseInt(tick), 
+                            scale: 'linear',
                         })
                     case "XAxis":
                         return React.cloneElement(child, xAxisConfig(child))
+                    //TODO disable dots when moving 
                     case "Line": 
-                        return React.cloneElement(child, { 
-                            //TODO disable dots when moving cause its causing performance issues when there are lots of them
-                            // dot: (prevXAxisDomain != xAxisDomain || prevYAxisDomain != yAxisDomain) ? null : true
+                        return React.cloneElement(child, {
                         })
                     case "Area": 
-                        return React.cloneElement(child, { 
-                            //TODO disable dots when moving cause its causing performance issues when there are lots of them
-                            // dot: (prevXAxisDomain != xAxisDomain || prevYAxisDomain != yAxisDomain) ? null : true
+                        return React.cloneElement(child, {
                         })
                     default:
                         return React.cloneElement(child)
@@ -184,26 +208,16 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
             } else {
                 return React.cloneElement(child)
             }
-            
         }
     );
 
-    const convertXAxisToNumber = (data: any) => {
-        if (data && data[0] && typeof data[0].name ==  'string') {
-            const tmp = data.map((point: any, index: any) => ({...point, name: index}))
-            // console.log(tmp)
-            return tmp
-        }
-        
-        return data
-    }
-
+    
     return (
         <div ref={containerRef} style={{position: 'relative'}}>
            
             {parent &&   
-                // withFading({
-                //     element: 
+                withFading({
+                    element: 
                             <div
                                 ref={toolbarRef} 
                                 style={{
@@ -225,10 +239,10 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                                                     data: parent.props.data,
                                                     containerRef: containerRef.current,
                                                     graph_uid: toolkit_graph_ref.current,
-                                                    yAxisDomain, 
-                                                    setYAxisDomain,
-                                                    xAxisDomain, 
-                                                    setXAxisDomain,
+                                                    yAxisDomainMap, 
+                                                    setYAxisDomainMap,
+                                                    xAxisDomainMap, 
+                                                    setXAxisDomainMap,
                                                     selectState,
                                                     setSelectState,
                                                     selectCoords,
@@ -249,10 +263,10 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                                     )
                                 }   
                             </div>
-                            // ,
-                //     duration: 0.5,
-                //     isOut: false
-                // })
+                            ,
+                    duration: 0.5,
+                    isOut: false
+                })
             }
 
             {
@@ -292,21 +306,30 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                     <AxisDragUtil {...{
                         graphProps: graphStatetRef.current,
                         panState,
-                        yAxisDomain,
-                        xAxisDomain,
+                        yAxisDomainMap,
+                        xAxisDomainMap,
                         offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0,
-                        onCoordYChange: (coords: any) => {
+                        onCoordYChange: (domain: any, axisId: any) => {
                             //TODO disable tooltip, hide toolbar
-                            setYAxisDomain(coords)
+                            setYAxisDomainMap({...yAxisDomainMap, [axisId]: domain});
                         }, 
-                        onCoordXChange: (coords: any) => {
+                        onCoordXChange: (domain: any, axisId: any) => {
                             //TODO disable tooltip, hide toolbar
-                            setXAxisDomain(coords)
+                            setXAxisDomainMap({...xAxisDomainMap, [axisId]: domain});
                         }, 
+                        onBatchCoordYChange: (domainMap: any) => {
+                            setYAxisDomainMap({...yAxisDomainMap, ...domainMap});
+                        },
+                        onBatchCoordXChange: (domainMap: any) => {
+                            setXAxisDomainMap({...xAxisDomainMap, ...domainMap});
+                        },
                         ticks,
                         setTicks,
-                        originalXAxisType: parent.props.children.filter((n: any) => n.type.name == 'XAxis')[0].props.type
-                        
+                        //everything gets converted to type 'number'
+                        originalXAxisType: (xAxisId: number) => 
+                            parent.props.children.filter((n: any) => n.type.name == 'XAxis' && n.props.xAxisId == xAxisId)[0].props.type,
+                        originalResolvedDomainX: originalResolvedDomainX.current,
+                        originalResolvedDomainY: originalResolvedDomainY.current,
                     }}/>
 
                     {selectState && <SelectionUtil {...{
@@ -314,8 +337,8 @@ export const Toolkit = withResponsiveContainer((props: ToolkitProps) => {
                         mode: selectState,
                         onCoordChange: (coords: any) => setSelectCoords(coords), 
                         setSelectState, 
-                        yAxisDomain,
-                        xAxisDomain,
+                        yAxisDomainMap,
+                        xAxisDomainMap,
                         drawType,
                         offsetLeft: containerRef.current ? containerRef.current.offsetLeft : 0
                     }} />}

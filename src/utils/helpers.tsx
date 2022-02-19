@@ -1,7 +1,7 @@
 
-export const getXAxisKey = (node: any) => {
+export const getXAxisKey = (node: any, axisId: any) => {
     // const lookup = node.type.displayName == "ScatterChart" ? 'Scatter' : 'XAxis'
-    return node.props.children.filter((n: any) => n.type.name == 'XAxis')[0].props.dataKey;
+    return node.props.children.filter((n: any) => n.type.name == 'XAxis' && n.props.xAxisId == axisId)[0].props.dataKey;
 }
 
 export const getData = (node: any) => {
@@ -28,59 +28,32 @@ export const flatten = (arr:any) => [].concat(...arr);
  * @returns 
  */
 export const resolveAxis = (
-    customizedProps: any, //should be data
+    customizedProps: any,
     axisDomain: any, 
-    type: string = 'number', 
-    filterNulls: boolean = true
+    type: string = 'number', //TODO remove
+    axisId: string = null, 
+    axis: string = null, 
 ) => {
-    //TODO if category just get first and last
-    //TODO /src/util/ChartUtils.ts:getDomainOfDataByKey 
-    let resolvedDomain: any = [axisDomain[0], axisDomain[1]];
-
-    if (type == 'category' && (axisDomain[0] == 'auto' || axisDomain[1] == 'auto' || isNaN(axisDomain[1]) || isNaN(axisDomain[0]))) {
-        const testPoint = customizedProps.formattedGraphicalItems[0]
-        const items = testPoint.props.points || testPoint.props.data;
-        return [0, items.length];
-    }
-
+    //TODO 🤦 recharts already does this for you, check domain and original domain for the axis
     if (axisDomain[0] == 'auto' || axisDomain[1] == 'auto') {    
-        const points: Array<any> = customizedProps.formattedGraphicalItems
-            .reduce((acc: any, items: any) => {
-                const getValues = (data: any) => {
-                    if (data[0] && data[0].value instanceof Array) { //TODO value?
-                        return acc.concat(flatten(data.map((point: any) => flatten(point.value || point.y))))
-                    } else {
-                        return acc.concat(flatten(data.map((point: any) => point.value || point.y)))
-                    }
-                }
-                
-                if (items.props.hasOwnProperty("points")) {
-                    return getValues(items.props.points)
-                } else if (items.props.hasOwnProperty("data")) {
-                    return getValues(items.props.data)
-                }
-                
-            }, [])
-            .filter((value: any) => filterNulls && (!isNaN(value) && !isNaN(value) && value != null && value != null));
-        
-       
-
-        if (axisDomain[0] == 'auto') {
-            resolvedDomain[0] = Math.min(...points);
-        } 
-        if (axisDomain[1] == 'auto') {
-            resolvedDomain[1] = Math.max(...points);
-        }
+        return customizedProps[axis + 'Map'][axisId].domain;
     }
     
-
-    return resolvedDomain;
+    return axisDomain;
 };
+
+export const convertXAxisToNumber = (data: any) => {
+    if (data && data[0] && typeof data[0].name ==  'string') {
+        return data.map((point: any, index: any) => ({...point, name: index}));
+    }
+    
+    return data;
+}
 
 export const getDomainOfDataByKey = (data: Array<any>, key: string, type: string) => {
     const arr = data.map(point => point[key]);
-    if (type != 'number') {
-        return [0, arr.length]
+    if (type == 'category') {
+        return [0, arr.length - 1]
     } else {
         return [Math.min(...arr), Math.max(...arr)]
     }

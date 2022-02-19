@@ -1,6 +1,6 @@
 {
   "name": "recharts-toolkit",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "Interactive graphing tools for recharts",
   "main": "lib/index.js",
   "module": "es6/index",
@@ -43,7 +43,9 @@
   "peerDependencies": {
     "react": "^16.0.0 || ^17.0.0",
     "react-dom": "^16.0.0 || ^17.0.0",
-    "recharts": "^2.1.8"
+    "recharts": "^2.1.8",
+    "d3-scale": "^4.0.2",
+    "@types/d3-scale": "^3.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
@@ -74,12 +76,12 @@
     "chai": "^4.2.0",
     "chai-enzyme": "^1.0.0-beta.1",
     "cross-env": "^7.0.3",
-    "d3-scale-chromatic": "^2.0.0",
+    "d3-scale-chromatic": "^3.0.0",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.15.6",
     "eslint": "^7.16.0",
-    "eslint-config-airbnb": "^18.2.1",
-    "eslint-config-prettier": "^7.1.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-prettier": "^3.1.2",
@@ -95,7 +97,7 @@
     "karma-mocha": "^2.0.1",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^5.0.0",
-    "mocha": "^8.2.1",
+    "mocha": "^9.2.0",
     "pre-commit": "^1.1.3",
     "prettier": "^2.2.1",
     "react": "^16.0.0",
@@ -104,29 +106,29 @@
     "react-test-renderer": "^16.12.0",
     "recharts": "^2.1.8",
     "rimraf": "^3.0.2",
-    "sinon": "^9.2.2",
+    "sinon": "^13.0.1",
     "terser-webpack-plugin": "^5.1.1",
-    "ts-loader": "^8.0.12",
+    "ts-loader": "^9.2.6",
     "typescript": "^4.1.3",
     "webpack": "^5.0.0",
     "webpack-bundle-analyzer": "^4.4.0",
     "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^3.11.0"
-  },
-  "dependencies": {
-    "@types/d3-interpolate": "^2.0.0",
+    "webpack-dev-server": "^3.11.0",
     "@types/d3-scale": "^3.0.0",
-    "@types/d3-shape": "^2.0.0",
+    "@types/d3-interpolate": "^2.0.0",
+    "@types/d3-shape": "^3.0.2",
     "classnames": "^2.2.5",
     "d3-interpolate": "^2.0.0",
-    "d3-scale": "^3.0.0",
+    "d3-scale": "^4.0.2",
     "d3-shape": "^2.0.0",
     "eventemitter3": "^4.0.1",
     "lodash": "^4.17.19",
     "react-is": "16.10.2",
-    "react-resize-detector": "^6.6.3",
+    "react-resize-detector": "^7.0.0",
     "react-smooth": "^2.0.0",
     "recharts-scale": "^0.4.4",
     "reduce-css-calc": "^2.1.8"
+  },
+  "dependencies": {
   }
 }

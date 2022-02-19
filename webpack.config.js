@@ -51,6 +51,12 @@ const config = {
       commonjs2: 'recharts',
       commonjs: 'recharts',
       amd: 'recharts',
+    },
+    'd3-scale': {
+      root: 'd3-scale',
+      commonjs2: 'd3-scale',
+      commonjs: 'd3-scale',
+      amd: 'd3-scale',
     }
   },
 
@@ -63,11 +69,11 @@ const config = {
   ],
 };
 
-if (env === 'analyse') {
+// if (env === 'analyse') {
   config.plugins.push(
     new BundleAnalyzerPlugin()
   );
-}
+// }
 
 if (env === 'production') {
   config.mode = 'production';

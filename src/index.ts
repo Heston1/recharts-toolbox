@@ -17,7 +17,6 @@ export { BoxSelect } from './components/BoxSelect';
 export { TooltipClosest } from './components/TooltipClosest';
 export { TooltipCompare } from './components/TooltipCompare';
 
-//TODO
 export { ReferenceLines } from './components/ReferenceLines';
 export { DrawTool } from './components/DrawTool';
 
@@ -29,4 +28,3 @@ export { AutoScale } from './components/AutoScale';
 export { Ruler } from './components/Ruler';
 
 export * as Icons from './Icons';
-//click/hover toggle
